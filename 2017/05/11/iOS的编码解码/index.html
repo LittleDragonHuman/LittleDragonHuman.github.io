@@ -8,16 +8,16 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>iOS的编码解码 | fly&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="###iOS9.0之前 提供2个主要的api:  stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc  stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc   这两个方法 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8S">
+  <meta name="description" content="iOS9.0之前提供2个主要的api:  stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc  stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc   这两个方法 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8Strin">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS的编码解码">
 <meta property="og:url" content="http://yoursite.com/2017/05/11/iOS的编码解码/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
-<meta property="og:description" content="###iOS9.0之前 提供2个主要的api:  stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc  stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc   这两个方法 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8S">
-<meta property="og:updated_time" content="2017-05-11T06:06:31.000Z">
+<meta property="og:description" content="iOS9.0之前提供2个主要的api:  stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc  stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc   这两个方法 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8Strin">
+<meta property="og:updated_time" content="2017-05-11T06:07:55.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS的编码解码">
-<meta name="twitter:description" content="###iOS9.0之前 提供2个主要的api:  stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc  stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc   这两个方法 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8S">
+<meta name="twitter:description" content="iOS9.0之前提供2个主要的api:  stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc  stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc   这两个方法 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8Strin">
   
     <link rel="alternative" href="/atom.xml" title="fly&#39;s blog" type="application/atom+xml">
   
@@ -173,8 +173,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>###iOS9.0之前</p>
-<p>提供2个主要的api:</p>
+        <h3 id="iOS9-0之前"><a href="#iOS9-0之前" class="headerlink" title="iOS9.0之前"></a>iOS9.0之前</h3><p>提供2个主要的api:</p>
 <ul>
 <li><p>stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc</p>
 </li>
@@ -221,8 +220,7 @@
 </ul>
 </li>
 </ul>
-<p>###iOS9.0之后</p>
-<p>上述两个api    将在9.0之后被废弃，取而代之的api分别为：</p>
+<h3 id="iOS9-0之后"><a href="#iOS9-0之后" class="headerlink" title="iOS9.0之后"></a>iOS9.0之后</h3><p>上述两个api    将在9.0之后被废弃，取而代之的api分别为：</p>
 <ul>
 <li><p>stringByAddingPercentEncodingWithAllowedCharacters:(NSCharacterSet *)allowedCharacters</p>
 </li>
@@ -263,15 +261,11 @@
 </ul>
 </li>
 </ul>
-<p>###js中相关的编码</p>
-<p>####escape</p>
-<p>escape主要作用于 <strong>字符串</strong> 进行编码</p>
+<h3 id="js中相关的编码"><a href="#js中相关的编码" class="headerlink" title="js中相关的编码"></a>js中相关的编码</h3><h4 id="escape"><a href="#escape" class="headerlink" title="escape"></a>escape</h4><p>escape主要作用于 <strong>字符串</strong> 进行编码</p>
 <p>对于url中的 <strong>:/?&amp;</strong> 是不会进行编码的</p>
-<p>####encodeURI</p>
-<p>场景：适用于对 <strong>url</strong> 进行编码 </p>
+<h4 id="encodeURI"><a href="#encodeURI" class="headerlink" title="encodeURI"></a>encodeURI</h4><p>场景：适用于对 <strong>url</strong> 进行编码 </p>
 <p>特点：不会对 <strong>ASCII字母、数字、~!@#&gt;amp;*()=:/,;?+`</strong> 进行编码</p>
-<p>####encodeURIComponent</p>
-<p>场景：适用于对 <strong>url</strong> 进行编码 </p>
+<h4 id="encodeURIComponent"><a href="#encodeURIComponent" class="headerlink" title="encodeURIComponent"></a>encodeURIComponent</h4><p>场景：适用于对 <strong>url</strong> 进行编码 </p>
 <p>特点：不会对 <strong>ASCII字母、数字、~!*()`</strong> 进行编码</p>
 
       
