@@ -14,7 +14,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/05/11/iOS的编码解码/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
 <meta property="og:description" content="iOS9.0之前提供2个主要的api:  stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc  这两个方法 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8StringE">
-<meta property="og:updated_time" content="2017-05-11T06:12:13.000Z">
+<meta property="og:updated_time" content="2017-05-11T06:12:56.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS的编码解码">
 <meta name="twitter:description" content="iOS9.0之前提供2个主要的api:  stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc  这两个方法 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8StringE">
@@ -251,9 +251,18 @@
 </ul>
 </li>
 </ul>
-<h3 id="js中相关的编码"><a href="#js中相关的编码" class="headerlink" title="js中相关的编码"></a>js中相关的编码</h3><h4 id="escape"><a href="#escape" class="headerlink" title="escape"></a>escape</h4><p>escape主要作用于 <strong>字符串</strong> 进行编码<br>对于url中的 <strong>:/?&amp;</strong> 是不会进行编码的</p>
-<h4 id="encodeURI"><a href="#encodeURI" class="headerlink" title="encodeURI"></a>encodeURI</h4><p>场景：适用于对 <strong>url</strong> 进行编码<br>特点：不会对 <strong>ASCII字母、数字、~!@#&gt;amp;*()=:/,;?+`</strong> 进行编码</p>
-<h4 id="encodeURIComponent"><a href="#encodeURIComponent" class="headerlink" title="encodeURIComponent"></a>encodeURIComponent</h4><p>场景：适用于对 <strong>url</strong> 进行编码<br>特点：不会对 <strong>ASCII字母、数字、~!*()`</strong> 进行编码</p>
+<h3 id="js中相关的编码"><a href="#js中相关的编码" class="headerlink" title="js中相关的编码"></a>js中相关的编码</h3><ul>
+<li>escape</li>
+</ul>
+<p>escape主要作用于 <strong>字符串</strong> 进行编码<br>对于url中的 <strong>:/?&amp;</strong> 是不会进行编码的</p>
+<ul>
+<li>encodeURI</li>
+</ul>
+<p>场景：适用于对 <strong>url</strong> 进行编码<br>特点：不会对 <strong>ASCII字母、数字、~!@#&gt;amp;*()=:/,;?+`</strong> 进行编码</p>
+<ul>
+<li>encodeURIComponent</li>
+</ul>
+<p>场景：适用于对 <strong>url</strong> 进行编码<br>特点：不会对 <strong>ASCII字母、数字、~!*()`</strong> 进行编码</p>
 
       
 
