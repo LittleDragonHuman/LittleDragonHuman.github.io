@@ -176,23 +176,16 @@
       
         <h3 id="iOS9-0之前"><a href="#iOS9-0之前" class="headerlink" title="iOS9.0之前"></a>iOS9.0之前</h3><p>提供2个主要的api:</p>
 <ul>
-<li><p>stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc</p>
-</li>
-<li><p>stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc</p>
-</li>
+<li>stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc</li>
+<li>stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc</li>
 </ul>
-<p>这两个方法 分别是对 <strong>字符串</strong> 进行编码和解码，通常采用的编码方式为 <strong>NSUTF8StringEncoding</strong>。</p>
-<p>实例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">NSString *param = @&quot;a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%q#r[s]t &amp;u=中文v`w|x&lt;y&gt;z&#123;&#125;\\^\&quot;&quot;;  </div><div class="line">NSString *utf8 = [param stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];</div></pre></td></tr></table></figure>
-<p>打印出 utf8，结果如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%25q%23r%5Bs%5Dt%20&amp;u=%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22</div></pre></td></tr></table></figure>
+<p>这两个方法 分别是对 <strong>字符串</strong> 进行编码和解码，通常采用的编码方式为 <strong>NSUTF8StringEncoding</strong>。<br>实例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">NSString *param = @&quot;a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%q#r[s]t &amp;u=中文v`w|x&lt;y&gt;z&#123;&#125;\\^\&quot;&quot;;  </div><div class="line">NSString *utf8 = [param stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];</div></pre></td></tr></table></figure></p>
+<p>打印出 utf8，结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%25q%23r%5Bs%5Dt%20&amp;u=%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22</div></pre></td></tr></table></figure></p>
 <p>分析结果和原始值，可以看出 api 只会对 <strong>%#[]空格中文`|&lt;&gt;{}\^”</strong> 进行编码。</p>
-<p>如果我们需要对特殊字符编码，怎么办呢？？<strong>参数单独编码</strong>，方法如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSString *after = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(nil, (CFStringRef)param, nil, (CFStringRef)@&quot;!*&apos;();:@&amp;=+$,/?%#[]&quot;, kCFStringEncodingUTF8));</div></pre></td></tr></table></figure>
+<p>如果我们需要对特殊字符编码，怎么办呢？？<strong>参数单独编码</strong>，方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSString *after = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(nil, (CFStringRef)param, nil, (CFStringRef)@&quot;!*&apos;();:@&amp;=+$,/?%#[]&quot;, kCFStringEncodingUTF8));</div></pre></td></tr></table></figure></p>
 <p>打印结果如下：</p>
 <pre><code>a%21b%2Ac%27d%28e%29f%3Bg%3Ah%40i%26j%3Dk%2Bl%24m%2Cn%2Fo%3Fp%25q%23r%5Bs%5Dt%20%26u%3D%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22
-</code></pre><p>分析方法：</p>
-<p>CFURLCreateStringByAddingPercentEscapes：生成一个字符串的副本，根据指定的 编码替换 等效百分比转义序列的某些字符。</p>
+</code></pre><p>分析：<br>CFURLCreateStringByAddingPercentEscapes：生成一个字符串的副本，根据指定的 编码替换 等效百分比转义序列的某些字符。</p>
 <p>参数如下：</p>
 <ul>
 <li><p>CFAllocatorRef allocator</p>
@@ -223,10 +216,8 @@
 </ul>
 <h3 id="iOS9-0之后"><a href="#iOS9-0之后" class="headerlink" title="iOS9.0之后"></a>iOS9.0之后</h3><p>上述两个api    将在9.0之后被废弃，取而代之的api分别为：</p>
 <ul>
-<li><p>stringByAddingPercentEncodingWithAllowedCharacters:(NSCharacterSet *)allowedCharacters</p>
-</li>
-<li><p>stringByRemovingPercentEncoding<br>这两个api在 <strong>iOS7</strong> 上已经生效。</p>
-</li>
+<li>stringByAddingPercentEncodingWithAllowedCharacters:(NSCharacterSet *)allowedCharacters</li>
+<li>stringByRemovingPercentEncoding<br>这两个api在 <strong>iOS7</strong> 上已经生效。</li>
 </ul>
 <p>allowedCharacters：表示 需要编码的字符，类型如下：</p>
 <ul>
