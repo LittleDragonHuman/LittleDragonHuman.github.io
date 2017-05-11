@@ -1,59 +1,694 @@
-extends base
-- var current_title = page.title || tag.name || category.name || site.title
+<!doctype html>
 
-block title
-  if config.subtitle
-    title= config.title + ' | ' + config.subtitle
-  else
-    title= config.title
-block content
 
-  for post in page.posts.toArray()
-    .post
-      h1.post-title
-        include _partial/helpers
-        a(href=url_for(post.path))
-          +title(post)
-      .post-meta= post.date.format(config.date_format)
-      if theme.duoshuo
-        a.ds-thread-count(data-thread-key=post.path, href=url_for(post.path) + '#comments')
-      if theme.disqus
-        a.disqus-comment-count(data-disqus-identifier=post.path, href=url_for(post.path) + '#disqus_thread')
-      if theme.gentie
-        a.ds-thread-count(class='cloud-tie-join-count', href=url_for(post.path) + '#comments')
-          span.join-count(lang='join-count' style='margin: 0 3px 0 1px;' data-url='#{config.url}#{url_for(post.path)}') 0
-          span= ' ' + __('Discuss')
-      if post.description
-        .post-content
-          != post.description
-      else if post.excerpt
-        .post-content
-          != post.excerpt
-      else if post.content
-        - var br = 0
-        - for (var i = 0; i < 5; ++i) {
-          - br = post.content.indexOf('\n',br+1)
-          if br<0
-            - break
-          if br >150
-            - break
-        - }
-        if br < 0
-          .post-content
-            != post.content
-        else
-          .post-content
-            != post.content.substring(0, br)
-      p(class='readmore')
-        a(href=url_for(post.path))= __('Readmore')
 
-  include _partial/paginator
-  if theme.disqus
-    script(id='dsq-count-scr', src='//#{theme.disqus}.disqus.com/count.js', async)
-  if theme.gentie
-    script.
-      var yunModuleEnv = true;
-    script(src='//img1.cache.netease.com/f2e/tie/yun/sdk/loader.js')
-    script.
-      var yunTieProductKey = '#{theme.gentie}';
-      Tie.loader('aHR0cHM6Ly9hcGkuZ2VudGllLjE2My5jb20vZXh0ZW5kL2xpc3Rfam9pbl9zY3JpcHQuaHRtbA==', true);
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="女程序猿一枚">
+<meta property="og:type" content="website">
+<meta property="og:title" content="fly&#39;s blog">
+<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:site_name" content="fly&#39;s blog">
+<meta property="og:description" content="女程序猿一枚">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="fly&#39;s blog">
+<meta name="twitter:description" content="女程序猿一枚">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/"/>
+
+
+
+
+
+  <title>fly's blog</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left 
+   page-home 
+ ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">fly's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+  <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/11/iOS的编码解码/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fly's blog">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fly's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/11/iOS的编码解码/" itemprop="url">iOS的编码解码</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-11T14:01:22+08:00">
+                2017-05-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="iOS9-0之前"><a href="#iOS9-0之前" class="headerlink" title="iOS9.0之前"></a>iOS9.0之前</h3><ul>
+<li>stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc</li>
+<li>stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc</li>
+</ul>
+<p>提供2个主要的api, 分别是对 <strong>字符串</strong> 进行编码和解码，通常采用的编码方式为 <strong>NSUTF8StringEncoding</strong>。</p>
+<p>实例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">NSString *param = @&quot;a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%q#r[s]t &amp;u=中文v`w|x&lt;y&gt;z&#123;&#125;\\^\&quot;&quot;;  </div><div class="line">NSString *utf8 = [param stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];</div></pre></td></tr></table></figure></p>
+<p>打印出 utf8，结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%25q%23r%5Bs%5Dt%20&amp;u=%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22</div></pre></td></tr></table></figure></p>
+<p>分析结果和原始值，可以看出 api 只会对 <strong>%#[]空格中文`|&lt;&gt;{}\^”</strong> 进行编码。</p>
+<p>如果我们需要对特殊字符编码，怎么办呢？？<strong>参数单独编码</strong>，方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSString *after = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(nil, (CFStringRef)param, nil, (CFStringRef)@&quot;!*&apos;();:@&amp;=+$,/?%#[]&quot;, kCFStringEncodingUTF8));</div></pre></td></tr></table></figure></p>
+<p>打印结果如下：</p>
+<pre><code>a%21b%2Ac%27d%28e%29f%3Bg%3Ah%40i%26j%3Dk%2Bl%24m%2Cn%2Fo%3Fp%25q%23r%5Bs%5Dt%20%26u%3D%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22
+</code></pre><p>分析 <strong>CFURLCreateStringByAddingPercentEscapes</strong>：生成一个字符串的副本，根据指定的 编码替换 等效百分比转义序列的某些字符。</p>
+<p>参数如下：</p>
+<ul>
+<li><p>CFAllocatorRef allocator</p>
+<ul>
+<li>用于为新CFString对象分配内存的分配器,传 <strong>NULL</strong> 或 <strong>kCFAllocatorDefault</strong> 来使用当前默认的分配器。</li>
+</ul>
+</li>
+<li><p>CFStringRef originalString</p>
+<ul>
+<li>要copy的原始字符串。</li>
+</ul>
+</li>
+<li><p>CFStringRef charactersToLeaveUnescaped</p>
+<ul>
+<li>想要保持原样的字符，传 <strong>NULL</strong> 指定所有非法字符都被转义。</li>
+</ul>
+</li>
+<li><p>CFStringRef legalURLCharactersToBeEscaped</p>
+<ul>
+<li>想要转义的非法字符，传 <strong>NULL</strong> 表示没有非法的字符要被转义。</li>
+</ul>
+</li>
+<li><p>CFStringEncoding encoding</p>
+<ul>
+<li>用于要翻译的编码</li>
+</ul>
+</li>
+</ul>
+<h3 id="iOS9-0之后"><a href="#iOS9-0之后" class="headerlink" title="iOS9.0之后"></a>iOS9.0之后</h3><p>上述两个api    将在9.0之后被废弃，取而代之的api分别为：</p>
+<ul>
+<li>stringByAddingPercentEncodingWithAllowedCharacters:(NSCharacterSet *)allowedCharacters</li>
+<li>stringByRemovingPercentEncoding</li>
+</ul>
+<p>这两个api在 <strong>iOS7</strong> 上已经生效。</p>
+<p>入参 <strong>allowedCharacters</strong> 表示 需要编码的字符，类型如下：</p>
+<ul>
+<li><p>URLUserAllowedCharacterSet</p>
+<ul>
+<li>“#%/:&lt;&gt;?@[]^`</li>
+</ul>
+</li>
+<li><p>URLPasswordAllowedCharacterSet</p>
+<ul>
+<li>“#%/:&lt;&gt;?@[]^`{|}</li>
+</ul>
+</li>
+<li><p>URLHostAllowedCharacterSet</p>
+<ul>
+<li>“#%/&lt;&gt;?@\^`{|}</li>
+</ul>
+</li>
+<li><p>URLPathAllowedCharacterSet</p>
+<ul>
+<li>“#%;&lt;&gt;?[]^`{|}</li>
+</ul>
+</li>
+<li><p>URLQueryAllowedCharacterSet</p>
+<ul>
+<li>“#%&lt;&gt;[]^`{|}</li>
+</ul>
+</li>
+<li><p>URLFragmentAllowedCharacterSet</p>
+<ul>
+<li>“#%&lt;&gt;[]^`{|}</li>
+</ul>
+</li>
+</ul>
+<h3 id="js中相关的编码"><a href="#js中相关的编码" class="headerlink" title="js中相关的编码"></a>js中相关的编码</h3><ul>
+<li>escape</li>
+</ul>
+<p>escape主要作用于 <strong>字符串</strong> 进行编码<br>对于url中的 <strong>:/?&amp;</strong> 是不会进行编码的</p>
+<ul>
+<li>encodeURI</li>
+</ul>
+<p>场景：适用于对 <strong>url</strong> 进行编码<br>特点：不会对 <strong>ASCII字母、数字、~!@#&gt;amp;*()=:/,;?+`</strong> 进行编码</p>
+<ul>
+<li>encodeURIComponent</li>
+</ul>
+<p>场景：适用于对 <strong>url</strong> 进行编码<br>特点：不会对 <strong>ASCII字母、数字、~!*()`</strong> 进行编码</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+  </section>
+
+  
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="fly's blog" />
+          <p class="site-author-name" itemprop="name">fly's blog</p>
+           
+              <p class="site-description motion-element" itemprop="description">女程序猿一枚</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">fly's blog</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
