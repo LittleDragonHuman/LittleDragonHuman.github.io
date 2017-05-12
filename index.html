@@ -352,7 +352,7 @@
 <h2 id="hexo"><a href="#hexo" class="headerlink" title="hexo"></a>hexo</h2><p><code>hexo</code> 的简介 以及 具体搭建，可以参照官网 <a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="external">Hexo</a></p>
 <p>如何将 <code>hexo</code> 和 <code>github</code> 绑定起来呢，主要通过 站点文件目录下的 <code>_config.yml</code> 文件。</p>
 <p>打开该文件，在文件 中的 <strong>#Deployment</strong> 中，添加如下代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">deploy:	  </div><div class="line">  type: git</div><div class="line">  repo: git@github.com:你的github账号/你的github账号.github.io.git</div><div class="line">branch: master</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">deploy:	  </div><div class="line">  type: git</div><div class="line">  repo: git@github.com:你的github账号/你的github账号.github.io.git</div><div class="line">branch: master</div></pre></td></tr></table></figure>
 <p>在执行命令 <code>hexo g -d</code> 后，<code>hexo g</code> 会生成一个静态网页(该网页可直接访问), <code>-d</code> 后，会使用 <code>git commit</code> 命令将静态网页到 <code>github</code> 上的 <code>master</code> 分支上，完成部署。</p>
 <p>刷新博客即可。</p>
 <h2 id="NexT"><a href="#NexT" class="headerlink" title="NexT"></a>NexT</h2><p><code>NexT</code> 是 <code>hexo</code> 的众多主题之一，参照官网 <a href="http://theme-next.iissnan.com/getting-started.html" target="_blank" rel="external">NexT</a>。</p>
