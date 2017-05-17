@@ -253,6 +253,330 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/17/OC-Runtime-二-类与对象/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fly's blog">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fly's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/17/OC-Runtime-二-类与对象/" itemprop="url">OC Runtime(二)类与对象</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-17T15:45:59+08:00">
+                2017-05-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在《简介》的最后部分，通过剖析 <code>NSObject</code>, 得出结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">@interface NSObject &lt;NSObject&gt; &#123;</div><div class="line">    Class isa  OBJC_ISA_AVAILABILITY;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>进入到 <code>Class</code> 下，定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_class *Class;</div></pre></td></tr></table></figure>
+<p>到此，明白了 <code>Objective－C</code> 中的 <code>类</code> ，其实是一个指向 <code>objc_class结构体</code> 的指针。</p>
+<p><code>Class isa</code> -&gt; <code>objc_class</code>;</p>
+<p>对于 <code>实例对象</code>，其结构如下：</p>
+<p><code>id</code> -&gt; <code>objc_object</code> -&gt; <code>Class isa</code> -&gt; <code>objc_class</code>;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_object *id;</div><div class="line"> </div><div class="line">struct objc_object &#123;</div><div class="line">    Class isa  OBJC_ISA_AVAILABILITY;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p><code>objc_class结构体</code> 中 又有什么呢？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">struct objc_class &#123;</div><div class="line">    Class isa  OBJC_ISA_AVAILABILITY;</div><div class="line"></div><div class="line">#if !__OBJC2__</div><div class="line">    Class super_class          			     OBJC2_UNAVAILABLE;</div><div class="line">    const char *name           			     OBJC2_UNAVAILABLE;</div><div class="line">    long version               			     OBJC2_UNAVAILABLE;</div><div class="line">    long info                  		  	     OBJC2_UNAVAILABLE;</div><div class="line">    long instance_size         			     OBJC2_UNAVAILABLE;</div><div class="line">    struct objc_ivar_list *ivars       	     OBJC2_UNAVAILABLE;</div><div class="line">    struct objc_method_list **methodLists    OBJC2_UNAVAILABLE;</div><div class="line">    struct objc_cache *cache                 OBJC2_UNAVAILABLE;</div><div class="line">    struct objc_protocol_list *protocols     OBJC2_UNAVAILABLE;</div><div class="line">#endif</div><div class="line"></div><div class="line">&#125; OBJC2_UNAVAILABLE;</div></pre></td></tr></table></figure>
+<h3 id="isa-＝-gt-meta-class"><a href="#isa-＝-gt-meta-class" class="headerlink" title="isa ＝&gt; meta class"></a>isa ＝&gt; meta class</h3><p>对于实例对象，<code>isa</code> 指向 自己的 <code>类Class</code> 。</p>
+<p>eg：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Child *son = [Child new];</div><div class="line">[son sendMsg:@&quot;发消息&quot;];</div><div class="line">NSArray *array = [NSArray array];</div></pre></td></tr></table></figure>
+<p>在上面代码里，<code>son</code> 是个实例对象，在 <code>son</code> 的 <code>Class</code> 中的 <code>isa</code> 指向的，就是 <code>Child</code>，即 <code>类Class</code> 。</p>
+<p>在 OC中，所有的 <code>类Class</code> 也是一个 <code>对象</code> ，也存在一个指向 <code>objc_class的结构体</code> 的isa，那这个类Class中的isa指向的是谁呢？</p>
+<p>答：指向 <code>元类(meta class)</code> 。</p>
+<p>为什么会有这种 <code>元类</code> 呢？因为方法类型有两种，一种是 <code>实例方法</code> (例子中的第二行)，一种是 <code>类方法</code> (例子中的第三行)。</p>
+<p>对于 <strong>实例方法</strong>，执行方法即发送消息时，会根据 <code>son</code>的isa指针，找到<code>Child</code>，然后 查找 <code>methodLists</code> 以及 <code>super_class</code> ，找到最匹配的方法。</p>
+<p>对于 <strong>类方法</strong>，为了执行方法，必须使 NSArray中的isa指针，指向 <code>一个能包含 这些类方法的 objc_class结构体</code> 。这个能包含 <code>类方法</code> 的类，就是 <code>元类</code> 。所以，元类的定义为，<code>一个类对象的类</code> 。(这里之所以说是 类对象，是因为一个类也是一个对象)。</p>
+<p>那么，元类的isa，指向的又是谁呢？</p>
+<p>答：指向 <code>基类的meta class</code> ，即 NSObject的meta class。 NSObject的meta class 则 <code>指向自己</code>。</p>
+<p>综上，可以总结出两种方法执行的查找对象：</p>
+<p>向一个 对象发送消息，runtime 会在 对象的 <code>所属类</code> 的方法列表中查找。</p>
+<p>向一个 类发送消息，runtime会在 <code>类 的 meta class</code> 中的方法列表中去查找。</p>
+<h3 id="super-class"><a href="#super-class" class="headerlink" title="super_class"></a>super_class</h3><p>顾名思义，指向 <code>父类</code> ，对于元类也是如此。如果当前Class 已经是最顶层的类(NSObject/NSProxy)，则super_class 为 <code>nil</code>。</p>
+<p>综上，根据isa＋meta class＋super_class，盗图一张，更容易理解：</p>
+<p><img src="../../images/isa+meta+super.jpg" alt="isa+meta+super"></p>
+<h3 id="name"><a href="#name" class="headerlink" title="name"></a>name</h3><p>类名</p>
+<h3 id="version"><a href="#version" class="headerlink" title="version"></a>version</h3><p>类的版本信息</p>
+<h3 id="instance-size"><a href="#instance-size" class="headerlink" title="instance_size"></a>instance_size</h3><p>实例变量大小</p>
+<h3 id="cache"><a href="#cache" class="headerlink" title="cache"></a>cache</h3><p>用于缓存最近使用的方法。</p>
+<p>一个接收者对象接收到一个消息时，它会根据 <code>isa</code> 指针去查找能够响应这个消息的对象。</p>
+<p>在实际使用中，这个对象只有一部分方法是常用的，很多方法其实很少用或者根本用不上。这种情况下，如果每次消息来时，我们都是 <code>methodLists</code> 中遍历一遍，性能势必很差。这时，cache就派上用场了。</p>
+<p>在我们每次调用过一个方法后，这个方法就会被缓存到 <code>cache</code> 列表中，下次调用的时候 runtime就会优先去 <code>cache</code> 中查找 ，如果 <code>cache</code> 没有，才去 <code>methodLists</code> 中查找方法 。这样，对于那些经常用到的方法的调用，但提高了调用的效率。</p>
+<p>对应的结构体如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">struct objc_cache &#123;</div><div class="line">    unsigned int mask /* total = mask + 1 */  OBJC2_UNAVAILABLE;</div><div class="line">    unsigned int occupied                     OBJC2_UNAVAILABLE;</div><div class="line">    Method buckets[1]                         OBJC2_UNAVAILABLE;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="操作方法"><a href="#操作方法" class="headerlink" title="操作方法"></a>操作方法</h3><ol>
+<li>类</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span> *class_getName(Class cls); <span class="comment">//获取类名</span></div><div class="line"><span class="built_in">BOOL</span> class_isMetaClass(Class cls); <span class="comment">//是否是 元类</span></div><div class="line">Class class_getSuperclass(Class cls); <span class="comment">//获取 父类</span></div><div class="line">Class class_setSuperclass(Class cls, Class newSuper); <span class="comment">//设置 父类，不推荐</span></div><div class="line"><span class="keyword">int</span> class_getVersion(Class cls); <span class="comment">//获取类的版本号</span></div><div class="line"><span class="keyword">void</span> class_setVersion(Class cls, <span class="keyword">int</span> version); <span class="comment">//设置类的版本号</span></div><div class="line">size_t class_getInstanceSize(Class cls); <span class="comment">//获取 类的实例大小</span></div></pre></td></tr></table></figure>
+<ol>
+<li>实例</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">Class object_getClass(<span class="keyword">id</span> obj); <span class="comment">//获取对象的类</span></div><div class="line">Class object_setClass(<span class="keyword">id</span> obj, Class cls) <span class="comment">//设置对象的类</span></div><div class="line"><span class="built_in">BOOL</span> object_isClass(<span class="keyword">id</span> obj); <span class="comment">//对象是否是一个类</span></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span> *object_getClassName(<span class="keyword">id</span> obj); <span class="comment">//获取对象的类名</span></div></pre></td></tr></table></figure>
+<p>eg:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">SaveRecord *s0 = [SaveRecord new];</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"object_getClass = %@"</span>, object_getClass(s0));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"object_isClass = %@"</span>, @(object_isClass(s0)));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"object_getClassName = %@"</span>, [<span class="built_in">NSString</span> stringWithUTF8String:object_getClassName(s0)]);</div><div class="line">    </div><div class="line">Class <span class="keyword">class</span> = [SaveRecord <span class="keyword">class</span>];</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getName = %@"</span>, [<span class="built_in">NSString</span> stringWithUTF8String:class_getName(<span class="keyword">class</span>)]);</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_isMetaClass = %@"</span>, @(class_isMetaClass(<span class="keyword">class</span>)));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getSuperclass = %@"</span>, class_getSuperclass(<span class="keyword">class</span>));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getVersion = %@"</span>, @(class_getVersion(<span class="keyword">class</span>)));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getInstanceSize = %@"</span>, @(class_getInstanceSize(<span class="keyword">class</span>)));</div></pre></td></tr></table></figure>
+<p>运行结果如下：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.541</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] object_getClass = SaveRecord</div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.541</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] object_isClass = <span class="number">0</span></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.548</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] object_getClassName = SaveRecord</div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.548</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_getName = SaveRecord</div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.549</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_isMetaClass = <span class="number">0</span></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.549</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_getSuperclass = <span class="built_in">NSObject</span></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.550</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_getVersion = <span class="number">0</span></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.551</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_getInstanceSize = <span class="number">24</span></div></pre></td></tr></table></figure>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a href="http://southpeak.github.io/2014/10/25/objective-c-runtime-1/" target="_blank" rel="external">Objective-C Runtime 运行时之一：类与对象</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/17/OC-Runtime-一-简介/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fly's blog">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fly's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/17/OC-Runtime-一-简介/" itemprop="url">OC Runtime(一)简介</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-17T15:32:31+08:00">
+                2017-05-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>翻译官方文档：</p>
+<p><code>Objective-C</code> 语言 将很多决定从编译阶段、链接阶段 推迟到运行时，只要有可能，它就会动态的去做事情。这就意味着，这门语言需要的不仅仅是一个编译器，同时还需要一个运行系统去执行编译过的代码。运行时系统就像是 <code>Objective-C</code> 语言的操作系统。<br>接下来将介绍类 <code>NSObject</code> 和 <code>Objective-C</code> 程序是如何与运行时系统进行交互的。它会检查运行时如何动态的加载一个新类，以及发送消息给其他对象。同时提供在运行时对象的信息。</p>
+<p>首先从 <code>NSObject</code> 入手，开始剖析，找到 <code>NSObject</code> 的定义，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">@interface NSObject &lt;NSObject&gt; &#123;</div><div class="line">    Class isa  OBJC_ISA_AVAILABILITY;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>isa</code> 指什么， 它的类型 <code>Class</code> 又是什么类型呢？</p>
+<p>接下来，分析 <code>Class</code> ，开始第二部分《类与对象》。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/16/NSUserDefaults/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -307,8 +631,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS</span>
+                  <a href="/categories/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
                   </a>
                 </span>
 
@@ -516,8 +840,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/杂记/" itemprop="url" rel="index">
-                    <span itemprop="name">杂记</span>
+                  <a href="/categories/实用/" itemprop="url" rel="index">
+                    <span itemprop="name">实用</span>
                   </a>
                 </span>
 
@@ -609,7 +933,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/11/iOS的编码解码/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/11/OC中的编码与解码/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="fly's blog">
@@ -628,7 +952,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/05/11/iOS的编码解码/" itemprop="url">iOS的编码解码</a></h1>
+                <a class="post-title-link" href="/2017/05/11/OC中的编码与解码/" itemprop="url">OC中的编码与解码</a></h1>
         
 
         <div class="post-meta">
@@ -663,8 +987,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS</span>
+                  <a href="/categories/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
                   </a>
                 </span>
 
@@ -707,7 +1031,8 @@
 <p>实例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">NSString *param = @&quot;a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%q#r[s]t &amp;u=中文v`w|x&lt;y&gt;z&#123;&#125;\\^\&quot;&quot;;  </div><div class="line">NSString *utf8 = [param stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];</div></pre></td></tr></table></figure></p>
 <p>打印出 utf8，结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%25q%23r%5Bs%5Dt%20&amp;u=%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22</div></pre></td></tr></table></figure></p>
 <p>分析结果和原始值，可以看出 api 只会对 <strong>%#[]空格中文`|&lt;&gt;{}\^”</strong> 进行编码。</p>
-<p>如果我们需要对特殊字符编码，怎么办呢？？<strong>参数单独编码</strong>，方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSString *after = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(nil, (CFStringRef)param, nil, (CFStringRef)@&quot;!*&apos;();:@&amp;=+$,/?%#[]&quot;, kCFStringEncodingUTF8));</div></pre></td></tr></table></figure></p>
+<p>如果我们需要对特殊字符编码，怎么办呢？？<strong>参数单独编码</strong>，方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSString *after = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(nil, (CFStringRef)param, nil, (CFStringRef)@&quot;!*&apos;();:@&amp;=+$,/?%#[]&quot;, kCFStringEncodingUTF8));</div></pre></td></tr></table></figure>
 <p>打印结果如下：</p>
 <pre><code>a%21b%2Ac%27d%28e%29f%3Bg%3Ah%40i%26j%3Dk%2Bl%24m%2Cn%2Fo%3Fp%25q%23r%5Bs%5Dt%20%26u%3D%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22
 </code></pre><p>分析 <strong>CFURLCreateStringByAddingPercentEscapes</strong>：生成一个字符串的副本，根据指定的 编码替换 等效百分比转义序列的某些字符。</p>
@@ -869,7 +1194,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
