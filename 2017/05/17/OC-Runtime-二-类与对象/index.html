@@ -97,7 +97,7 @@
 <meta property="og:site_name" content="fly&#39;s blog">
 <meta property="og:description" content="在《简介》的最后部分，通过剖析 NSObject, 得出结构： 123@interface NSObject &amp;lt;NSObject&amp;gt; &amp;#123;    Class isa  OBJC_ISA_AVAILABILITY;&amp;#125; 进入到 Class 下，定义如下： 1typedef struct objc_class *Class; 到此，明白了 Objective－C 中的 类 ，">
 <meta property="og:image" content="http://yoursite.com/2017/05/images/isa+meta+super.jpg">
-<meta property="og:updated_time" content="2017-05-17T08:57:22.000Z">
+<meta property="og:updated_time" content="2017-05-18T06:57:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OC Runtime(二)类与对象">
 <meta name="twitter:description" content="在《简介》的最后部分，通过剖析 NSObject, 得出结构： 123@interface NSObject &amp;lt;NSObject&amp;gt; &amp;#123;    Class isa  OBJC_ISA_AVAILABILITY;&amp;#125; 进入到 Class 下，定义如下： 1typedef struct objc_class *Class; 到此，明白了 Objective－C 中的 类 ，">
@@ -388,13 +388,13 @@
 <p>在我们每次调用过一个方法后，这个方法就会被缓存到 <code>cache</code> 列表中，下次调用的时候 runtime就会优先去 <code>cache</code> 中查找 ，如果 <code>cache</code> 没有，才去 <code>methodLists</code> 中查找方法 。这样，对于那些经常用到的方法的调用，但提高了调用的效率。</p>
 <p>对应的结构体如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">struct objc_cache &#123;</div><div class="line">    unsigned int mask /* total = mask + 1 */  OBJC2_UNAVAILABLE;</div><div class="line">    unsigned int occupied                     OBJC2_UNAVAILABLE;</div><div class="line">    Method buckets[1]                         OBJC2_UNAVAILABLE;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
-<h3 id="操作方法"><a href="#操作方法" class="headerlink" title="操作方法"></a>操作方法</h3><ol>
+<h3 id="操作方法"><a href="#操作方法" class="headerlink" title="操作方法"></a>操作方法</h3><ul>
 <li>类</li>
-</ol>
+</ul>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span> *class_getName(Class cls); <span class="comment">//获取类名</span></div><div class="line"><span class="built_in">BOOL</span> class_isMetaClass(Class cls); <span class="comment">//是否是 元类</span></div><div class="line">Class class_getSuperclass(Class cls); <span class="comment">//获取 父类</span></div><div class="line">Class class_setSuperclass(Class cls, Class newSuper); <span class="comment">//设置 父类，不推荐</span></div><div class="line"><span class="keyword">int</span> class_getVersion(Class cls); <span class="comment">//获取类的版本号</span></div><div class="line"><span class="keyword">void</span> class_setVersion(Class cls, <span class="keyword">int</span> version); <span class="comment">//设置类的版本号</span></div><div class="line">size_t class_getInstanceSize(Class cls); <span class="comment">//获取 类的实例大小</span></div></pre></td></tr></table></figure>
-<ol>
+<ul>
 <li>实例</li>
-</ol>
+</ul>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">Class object_getClass(<span class="keyword">id</span> obj); <span class="comment">//获取对象的类</span></div><div class="line">Class object_setClass(<span class="keyword">id</span> obj, Class cls) <span class="comment">//设置对象的类</span></div><div class="line"><span class="built_in">BOOL</span> object_isClass(<span class="keyword">id</span> obj); <span class="comment">//对象是否是一个类</span></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span> *object_getClassName(<span class="keyword">id</span> obj); <span class="comment">//获取对象的类名</span></div></pre></td></tr></table></figure>
 <p>eg:</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">SaveRecord *s0 = [SaveRecord new];</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"object_getClass = %@"</span>, object_getClass(s0));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"object_isClass = %@"</span>, @(object_isClass(s0)));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"object_getClassName = %@"</span>, [<span class="built_in">NSString</span> stringWithUTF8String:object_getClassName(s0)]);</div><div class="line">    </div><div class="line">Class <span class="keyword">class</span> = [SaveRecord <span class="keyword">class</span>];</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getName = %@"</span>, [<span class="built_in">NSString</span> stringWithUTF8String:class_getName(<span class="keyword">class</span>)]);</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_isMetaClass = %@"</span>, @(class_isMetaClass(<span class="keyword">class</span>)));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getSuperclass = %@"</span>, class_getSuperclass(<span class="keyword">class</span>));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getVersion = %@"</span>, @(class_getVersion(<span class="keyword">class</span>)));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getInstanceSize = %@"</span>, @(class_getInstanceSize(<span class="keyword">class</span>)));</div></pre></td></tr></table></figure>
@@ -448,6 +448,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/18/OC-Runtime-三-成员变量与属性/" rel="prev" title="OC Runtime(三)成员变量与属性">
+                OC Runtime(三)成员变量与属性 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -526,7 +530,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
