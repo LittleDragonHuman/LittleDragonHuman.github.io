@@ -253,6 +253,205 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/19/OC-Runtime-四-方法与消息/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fly's blog">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fly's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/19/OC-Runtime-四-方法与消息/" itemprop="url">OC Runtime(四)方法与消息</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-19T10:54:57+08:00">
+                2017-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/05/19/OC-Runtime-四-方法与消息/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/05/19/OC-Runtime-四-方法与消息/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Method"><a href="#Method" class="headerlink" title="Method"></a>Method</h2><p>在 <code>objc_class</code> 结构体中，存在</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">struct objc_method_list **methodLists</div></pre></td></tr></table></figure>
+<p>这是个 方法定义的链表。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">struct objc_method_list &#123;</div><div class="line">    struct objc_method_list *obsolete  OBJC2_UNAVAILABLE;</div><div class="line">    int method_count                   OBJC2_UNAVAILABLE;</div><div class="line">#ifdef __LP64__</div><div class="line">    int space                          OBJC2_UNAVAILABLE;</div><div class="line">#endif</div><div class="line">    /* variable length structure */</div><div class="line">    struct objc_method method_list[1]  OBJC2_UNAVAILABLE;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>method_list</code> 中的类型 为 <code>objc_method</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_method *Method;</div><div class="line"></div><div class="line">struct objc_method &#123;</div><div class="line">    SEL method_name            OBJC2_UNAVAILABLE;</div><div class="line">    char *method_types         OBJC2_UNAVAILABLE;</div><div class="line">    IMP method_imp             OBJC2_UNAVAILABLE;</div><div class="line">&#125;                              OBJC2_UNAVAILABLE;</div></pre></td></tr></table></figure>
+<p><code>method_name</code> ：方法名</p>
+<p><code>method_types</code> ：方法类型</p>
+<p><code>method_imp</code> ：方法的实现代码块地址</p>
+<h3 id="SEL"><a href="#SEL" class="headerlink" title="SEL"></a>SEL</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_selector *SEL;</div></pre></td></tr></table></figure>
+<p>可以理解 <code>objc_selector</code> 为一个 <code>char *</code>类型的字符串</p>
+<p>eg：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">SEL sel0 = @selector(lowercaseString);</div><div class="line">SEL sel1 = @selector(lowercaseStringWithLocale:);</div><div class="line">SEL sel2 = @selector(unarchiveTopLevelObjectWithData:error:);</div><div class="line"></div><div class="line">NSLog(@&quot;sel0 = %s&quot;, sel0);</div><div class="line">NSLog(@&quot;sel1 = %s&quot;, sel1);</div><div class="line">NSLog(@&quot;sel2 = %s&quot;, sel2);</div><div class="line"></div><div class="line">打印结果：</div><div class="line">sel0 = lowercaseString</div><div class="line">sel1 = lowercaseStringWithLocale:</div><div class="line">sel2 = unarchiveTopLevelObjectWithData:error:</div></pre></td></tr></table></figure>
+<p>由此可以看出，<code>SEL ＝ 方法名＋参数序列</code>。</p>
+<p>不同的类可以拥有相同的 <code>selector</code> ，不同类的实例对象 <code>performSelector</code> 相同的 <code>selector</code> 时，会在各自的方法链表中根据 <code>selector</code> 去查找具体的方法实现 <code>IMP</code>，然后用这个方法实现去执行 具体的实现代码。 </p>
+<p>这是一个 <code>动态绑定</code> 的过程，在编译的时候，并不知道最终会执行哪一些代码，只有在执行的时候，通过 <code>selector</code> 去查询，才能确定。</p>
+<h3 id="IMP"><a href="#IMP" class="headerlink" title="IMP"></a>IMP</h3><p>implementation的缩写，是 <code>Method中实现代码块的地址</code></p>
+<p>IMP指针：指向一个 <code>方法实现</code> 的指针。</p>
+<p>每个方法都对应着 一个 <code>IMP</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/// A pointer to the function of a method implementation. </div><div class="line">#if !OBJC_OLD_DISPATCH_PROTOTYPES</div><div class="line">	typedef void (*IMP)(void /* id, SEL, ... */ ); </div><div class="line">#else</div><div class="line">	typedef id (*IMP)(id, SEL, ...); </div><div class="line">#endif</div></pre></td></tr></table></figure>
+<p>每个类存在一个<code>方法列表</code>，这个方法列表会把 <code>selector</code> 的名称 映射到 <code>相关的方法实现</code> 之上，使得 <code>动态消息派发系统</code> 能够根据此找到 应该调用的方法。这些方法 均以 <code>函数指针</code> 的形式表示，这种指针就叫做 <code>IMP</code> 。</p>
+<p>IMP与SEL的关系，盗图一张：</p>
+<p><img src="../../images/SEL与IMP" alt="SEL与IMP的关系"></p>
+<h3 id="相关方法"><a href="#相关方法" class="headerlink" title="相关方法"></a>相关方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">/* 获取方法名称 */</div><div class="line">SEL method_getName(Method m)</div><div class="line">/* 获取方法的实现 */</div><div class="line">IMP method_getImplementation(Method m) </div><div class="line">/* 获取方法参数的描述以及类型 */</div><div class="line">const char *method_getTypeEncoding(Method m) </div><div class="line">/* 返回方法可以接收的参数的个数 */</div><div class="line">unsigned int method_getNumberOfArguments(Method m) </div><div class="line">/* 返回方法返回类型的描述 */</div><div class="line">char *method_copyReturnType(Method m) </div><div class="line">/* 返回方法某个参数的描述 */</div><div class="line">method_copyArgumentType(Method m, unsigned int index) </div><div class="line">/* 返回方法的返回类型描述,reference */</div><div class="line">/* dst:存储描述的引用string */</div><div class="line">/* dst_len:可以存储描述的最大的字符数量 */</div><div class="line">void method_getReturnType(Method m, char *dst, size_t dst_len)</div><div class="line">/* 同method_copyArgumentType，使用dst去存储描述 */</div><div class="line">void method_getArgumentType(Method m, unsigned int index, char *dst, size_t dst_len) </div><div class="line">/* 设置 方法的实现 */</div><div class="line">IMP method_setImplementation(Method m, IMP imp)</div><div class="line">/* 交换两个方法的实现 */</div><div class="line">/* 原子版本： */</div><div class="line">/* IMP imp1 = method_getImplementation(m1); */</div><div class="line">/* IMP imp2 = method_getImplementation(m2); */</div><div class="line">/* method_setImplementation(m1, imp2); */</div><div class="line">/* method_setImplementation(m2, imp1);*/</div><div class="line">void method_exchangeImplementations(Method m1, Method m2)</div></pre></td></tr></table></figure>
+<h2 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h2><p>在Objective-C中，只有到<code>runtime</code>时，消息才会绑定到方法的实现上。在编译阶段，编译器将一个消息表达式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[receiver message];</div></pre></td></tr></table></figure>
+<p>转成 消息的方法：<code>objc_msgSend</code> 。这个方法会将 <code>接受者</code>，消息表达式中提到的方法名，也就是<code>selector</code>，作为objc_msdSend方法的主要两个参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">objc_msgSend(receiver, selector)</div></pre></td></tr></table></figure>
+<p>如果消息表达式带有参数，则处理如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">objc_msgSend(receiver, selector, arg1, arg2, ...)</div></pre></td></tr></table></figure>
+<p>消息方法 会在 <code>动态绑定</code> 阶段，完成必要的工作：</p>
+<ol>
+<li>找到selector指定的实现方法(implementation)。不同的类可以实现<code>相同</code>的方法，所以具体的执行方法要取决于<code>接收者的类</code>。</li>
+<li>调用程序，将接收者(指向数据的指针)以及参数传递给程序。</li>
+<li>最后，将程序的返回值作为自己的返回值 返回。</li>
+</ol>
+<p>ps: 编译器会生成消息的传递方法，我们要避免直接调用。</p>
+<p>消息传递的关键 在于 <code>编译器为每一个类和对象</code> 所构建出的结构。每一个类的结构里 都包含了两个 基本元素：</p>
+<ol>
+<li>指向super class的指针</li>
+<li>类的 dispatch table。这个 table里面 包含了 将 selector和其标识的方法的地址 关联起来的 条目。比如 setOrigin:的selector和setOrigin:的实现地址。</li>
+</ol>
+<p>盗图一张：</p>
+<p><img src="../../images/isa+msg.gif" alt="img"></p>
+<p>上图 展示的，就是在运行时动态选择方法的过程，即方法动态绑定到消息上。</p>
+<p>为了加快消息的过程，运行时系统会缓存 曾经用到的selector和方法的地址。</p>
+<h3 id="隐含参数"><a href="#隐含参数" class="headerlink" title="隐含参数"></a>隐含参数</h3><p>当 objc_msgSend 找到实现方法时，会调用 并传递 所有的参数，同时 包括2个隐含参数：</p>
+<ol>
+<li>接收对象 receiving object</li>
+<li>方法的selector</li>
+</ol>
+<p>之所以说是 <code>隐含参数</code>，是因为在 源码定义的方法中，并不声明他们，他们会在 <code>编译阶段</code>，加入到实现中。</p>
+<p>receiving object =&gt; self<br>selector =&gt; _cmd</p>
+<h3 id="获取方法地址"><a href="#获取方法地址" class="headerlink" title="获取方法地址"></a>获取方法地址</h3><p>规避 <code>动态绑定</code> 的唯一方法 就是 <code>获取 方法的地址</code>，然后直接调用。这种方式 适合 特定的方法已经成功执行多次，希望能避免每次方法执行的开销。</p>
+<p>通过方法methodForSelector:可以获取到指向实现方法过程的指针，然后通过该指针，调用过程。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/19/RN-0-43后Text行数过长/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1558,7 +1757,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
