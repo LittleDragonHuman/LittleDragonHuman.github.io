@@ -253,6 +253,176 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/06/01/OC-Runtime-五-消息转发机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fly's blog">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fly's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/06/01/OC-Runtime-五-消息转发机制/" itemprop="url">OC-Runtime(五)消息转发机制</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-01T10:35:29+08:00">
+                2017-06-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/06/01/OC-Runtime-五-消息转发机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/06/01/OC-Runtime-五-消息转发机制/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="消息转发机制"><a href="#消息转发机制" class="headerlink" title="消息转发机制"></a>消息转发机制</h1><p>正常情况下，我们向对象发送消息 <code>objc_sendMsg</code> 。首先在 <code>self</code> 中去查找，如果没有找到相应的 <code>selector</code> ，则通过 <code>isa</code> 去 <code>super</code> 中查找，如果仍然未查找到，则启动<code>消息转发机制</code> 。</p>
+<h3 id="1、询问该类-能否动态添加-方法（动态方法解析）"><a href="#1、询问该类-能否动态添加-方法（动态方法解析）" class="headerlink" title="1、询问该类 能否动态添加 方法（动态方法解析）"></a>1、询问该类 能否动态添加 方法（动态方法解析）</h3><p><code>resolveInstanceMethod</code> 或 <code>resolveClassMethod</code>。给个机会，<code>添加</code> 处理函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void dynamicMethodIMP(id self, SEL _cmd) </div><div class="line">&#123;</div><div class="line">    // implementation ....</div><div class="line">&#125;</div><div class="line"></div><div class="line">+ (BOOL)resolveInstanceMethod:(SEL)aSEL</div><div class="line">&#123;</div><div class="line">    if (aSEL == @selector(changeName)) &#123;</div><div class="line">          class_addMethod([self class], aSEL, (IMP) dynamicMethodIMP, &quot;v@:&quot;);</div><div class="line">          return YES;</div><div class="line">    &#125;</div><div class="line">    return [super resolveInstanceMethod:aSEL];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以在此处 使用 <code>class_addMethod</code> 动态添加函数。</p>
+<p>关于 <code>v@:</code> 将在后续的 <code>Type Encoding</code> 中介绍。</p>
+<h3 id="2、询问-是否其他类-可以-处理（重定向）"><a href="#2、询问-是否其他类-可以-处理（重定向）" class="headerlink" title="2、询问 是否其他类 可以 处理（重定向）"></a>2、询问 是否其他类 可以 处理（重定向）</h3><p><code>forwardingTargetForSelector</code>。</p>
+<p>将不能处理的selector转由<code>其他对象</code> 处理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">- (id)forwardingTargetForSelector:(SEL)aSelector </div><div class="line">&#123;</div><div class="line">    NSLog(@&quot;%s&quot;,__func__);</div><div class="line">    if (aSelector == @selector(lowercaseString)) &#123;</div><div class="line">        return [NSString new];</div><div class="line">    &#125;</div><div class="line">    return [super forwardingTargetForSelector:aSelector];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="3、消息转发-流程"><a href="#3、消息转发-流程" class="headerlink" title="3、消息转发 流程"></a>3、消息转发 流程</h3><p>在1，2都失效的情况下，会进入到 <code>消息转发流程</code> ，这是 消息失败前的最后一次机会。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation</div></pre></td></tr></table></figure>
+<p><code>NSInvocation</code> 是唯一的入参，这个对象包含了原始的信息。</p>
+<p>通过<code>forwardInvocation</code> 可以为消息指定一个默认的处理者。</p>
+<p>这个转发流程，其实也是将 方法的调用，交由其他类去执行。与 2 不同的是，<code>forwardInvocation</code> 的参数是一个<code>NSInvocation</code>。</p>
+<p><code>forwardInvocation</code> 需要做两件事情：</p>
+<ol>
+<li>决定消息 去往哪里</li>
+<li>将 原始的参数一起传递过去</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation</div><div class="line">&#123;</div><div class="line">    if ([someOtherObject respondsToSelector:</div><div class="line">            [anInvocation selector]]) &#123;</div><div class="line">    	[anInvocation invokeWithTarget:someOtherObject];</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">    	[super forwardInvocation:anInvocation];</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>forwardInvocation</code> 方法 可以作为 <code>未知消息</code> 的 <code>分发中心</code>，将 未知消息 分配到 <code>不同的接收者</code>，或者 作为一个 <code>中转站</code>，将所有的消息，发给 同一个 目的地。</p>
+<p>在 <code>forwardInvocation</code> 之前，需要先去 判断 方法 是否已经通过 <code>签名</code>。</p>
+<p><code>methodSignatureForSelector</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector</div><div class="line">&#123;</div><div class="line">	NSMethodSignature *sig = [BBMessageForwardProxy instanceMethodSignatureForSelector:@selector(bb_dealNotRecognizedMessage:)];</div><div class="line">    return sig;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果 返回 nil，则转发终止。</p>
+<p>签名通过后，才调用 <code>forwardInvocation</code></p>
+<h3 id="整体流程图"><a href="#整体流程图" class="headerlink" title="整体流程图"></a>整体流程图</h3><p><img src="../../images/msg转发流程.png" alt="消息转发流程"></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/19/OC-Runtime-四-方法与消息/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1757,7 +1927,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

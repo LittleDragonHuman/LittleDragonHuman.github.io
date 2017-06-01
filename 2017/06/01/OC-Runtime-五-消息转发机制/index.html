@@ -90,16 +90,18 @@
 
 
 
-<meta name="description" content="成员变量继续分析 objc_class 结构体 1234567891011121314151617181920212223struct objc_ivar_list *ivars;struct objc_ivar_list &amp;#123;    int ivar_count           OBJC2_UNAVAILABLE;#ifdef __LP64__    int space">
+<meta name="description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。 1、询问该类 能否动态添加 方法（动态方法解析）resolveInstanceMethod 或 resolveClassMethod。给个机会，添加 处理函数。 12345678">
 <meta property="og:type" content="article">
-<meta property="og:title" content="OC Runtime(三)成员变量与属性">
-<meta property="og:url" content="http://yoursite.com/2017/05/18/OC-Runtime-三-成员变量与属性/index.html">
+<meta property="og:title" content="OC-Runtime(五)消息转发机制">
+<meta property="og:url" content="http://yoursite.com/2017/06/01/OC-Runtime-五-消息转发机制/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
-<meta property="og:description" content="成员变量继续分析 objc_class 结构体 1234567891011121314151617181920212223struct objc_ivar_list *ivars;struct objc_ivar_list &amp;#123;    int ivar_count           OBJC2_UNAVAILABLE;#ifdef __LP64__    int space">
-<meta property="og:updated_time" content="2017-05-18T07:45:35.000Z">
+<meta property="og:description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。 1、询问该类 能否动态添加 方法（动态方法解析）resolveInstanceMethod 或 resolveClassMethod。给个机会，添加 处理函数。 12345678">
+<meta property="og:image" content="http://yoursite.com/2017/06/images/msg转发流程.png">
+<meta property="og:updated_time" content="2017-06-01T08:17:43.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OC Runtime(三)成员变量与属性">
-<meta name="twitter:description" content="成员变量继续分析 objc_class 结构体 1234567891011121314151617181920212223struct objc_ivar_list *ivars;struct objc_ivar_list &amp;#123;    int ivar_count           OBJC2_UNAVAILABLE;#ifdef __LP64__    int space">
+<meta name="twitter:title" content="OC-Runtime(五)消息转发机制">
+<meta name="twitter:description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。 1、询问该类 能否动态添加 方法（动态方法解析）resolveInstanceMethod 或 resolveClassMethod。给个机会，添加 处理函数。 12345678">
+<meta name="twitter:image" content="http://yoursite.com/2017/06/images/msg转发流程.png">
 
 
 
@@ -127,13 +129,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/05/18/OC-Runtime-三-成员变量与属性/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/06/01/OC-Runtime-五-消息转发机制/"/>
 
 
 
 
 
-  <title>OC Runtime(三)成员变量与属性 | fly's blog</title>
+  <title>OC-Runtime(五)消息转发机制 | fly's blog</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -252,7 +254,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/18/OC-Runtime-三-成员变量与属性/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/06/01/OC-Runtime-五-消息转发机制/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="fly's blog">
@@ -269,7 +271,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">OC Runtime(三)成员变量与属性</h1>
+          <h1 class="post-title" itemprop="name headline">OC-Runtime(五)消息转发机制</h1>
         
 
         <div class="post-meta">
@@ -281,8 +283,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-18T09:54:04+08:00">
-                2017-05-18
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-01T10:35:29+08:00">
+                2017-06-01
               </time>
             
 
@@ -322,9 +324,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/05/18/OC-Runtime-三-成员变量与属性/#comments" itemprop="discussionUrl">
+                <a href="/2017/06/01/OC-Runtime-五-消息转发机制/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/18/OC-Runtime-三-成员变量与属性/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2017/06/01/OC-Runtime-五-消息转发机制/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -349,21 +351,32 @@
       
 
       
-        <h2 id="成员变量"><a href="#成员变量" class="headerlink" title="成员变量"></a>成员变量</h2><p>继续分析 <code>objc_class</code> 结构体</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">struct objc_ivar_list *ivars;</div><div class="line"></div><div class="line">struct objc_ivar_list &#123;</div><div class="line">    int ivar_count           OBJC2_UNAVAILABLE;</div><div class="line">#ifdef __LP64__</div><div class="line">    int space                OBJC2_UNAVAILABLE;</div><div class="line">#endif</div><div class="line">    /* variable length structure */</div><div class="line">    struct objc_ivar ivar_list[1]   OBJC2_UNAVAILABLE;</div><div class="line">&#125;                                                            OBJC2_UNAVAILABLE;</div><div class="line"></div><div class="line">// An opaque type that represents an instance variable.</div><div class="line"></div><div class="line">typedef struct objc_ivar *Ivar;</div><div class="line"></div><div class="line">struct objc_ivar &#123;</div><div class="line">    char *ivar_name    OBJC2_UNAVAILABLE;</div><div class="line">    char *ivar_type    OBJC2_UNAVAILABLE;</div><div class="line">    int ivar_offset    OBJC2_UNAVAILABLE;</div><div class="line">#ifdef __LP64__</div><div class="line">    int space          OBJC2_UNAVAILABLE;</div><div class="line">#endif</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p><code>Ivar</code> 代表的就是 实例变量的类型。<br><code>ivar_name</code> ：变量名<br><code>ivar_type</code> ：变量类型<br><code>ivar_offset</code> ：基地址偏移字节</p>
-<h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">/// An opaque type that represents an Objective-C declared property.</div><div class="line"></div><div class="line">typedef struct objc_property *objc_property_t;</div><div class="line"></div><div class="line">/// Defines a property attribute</div><div class="line">typedef struct &#123;</div><div class="line">    const char *name;    /**&lt; The name of the attribute */</div><div class="line">    const char *value;   /**&lt; The value of the attribute (usually empty) */</div><div class="line">&#125; objc_property_attribute_t;</div></pre></td></tr></table></figure>
-<h2 id="相关方法"><a href="#相关方法" class="headerlink" title="相关方法"></a>相关方法</h2><ul>
-<li>成员变量</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">const char *ivar_getName(Ivar v); //成员变量名称</div><div class="line">ptrdiff_t ivar_getOffset(Ivar v); //成员变量的偏移</div></pre></td></tr></table></figure>
-<ul>
-<li>属性</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">const char *property_getName(objc_property_t property); //获取属性名称</div><div class="line">const char *property_getAttributes(objc_property_t property); //获取属性的特性描述字符串</div><div class="line">objc_property_attribute_t *property_copyAttributeList(objc_property_t property, unsigned int *outCount); //返回一个属性的特性列表</div><div class="line">char *property_copyAttributeValue(objc_property_t property, const char *attributeName); //获取属性中指定的特性</div></pre></td></tr></table></figure>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="http://southpeak.github.io/2014/10/30/objective-c-runtime-2/" target="_blank" rel="external">Objective-C Runtime 运行时之二：成员变量与属性</a></li>
-</ul>
+        <h1 id="消息转发机制"><a href="#消息转发机制" class="headerlink" title="消息转发机制"></a>消息转发机制</h1><p>正常情况下，我们向对象发送消息 <code>objc_sendMsg</code> 。首先在 <code>self</code> 中去查找，如果没有找到相应的 <code>selector</code> ，则通过 <code>isa</code> 去 <code>super</code> 中查找，如果仍然未查找到，则启动<code>消息转发机制</code> 。</p>
+<h3 id="1、询问该类-能否动态添加-方法（动态方法解析）"><a href="#1、询问该类-能否动态添加-方法（动态方法解析）" class="headerlink" title="1、询问该类 能否动态添加 方法（动态方法解析）"></a>1、询问该类 能否动态添加 方法（动态方法解析）</h3><p><code>resolveInstanceMethod</code> 或 <code>resolveClassMethod</code>。给个机会，<code>添加</code> 处理函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void dynamicMethodIMP(id self, SEL _cmd) </div><div class="line">&#123;</div><div class="line">    // implementation ....</div><div class="line">&#125;</div><div class="line"></div><div class="line">+ (BOOL)resolveInstanceMethod:(SEL)aSEL</div><div class="line">&#123;</div><div class="line">    if (aSEL == @selector(changeName)) &#123;</div><div class="line">          class_addMethod([self class], aSEL, (IMP) dynamicMethodIMP, &quot;v@:&quot;);</div><div class="line">          return YES;</div><div class="line">    &#125;</div><div class="line">    return [super resolveInstanceMethod:aSEL];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以在此处 使用 <code>class_addMethod</code> 动态添加函数。</p>
+<p>关于 <code>v@:</code> 将在后续的 <code>Type Encoding</code> 中介绍。</p>
+<h3 id="2、询问-是否其他类-可以-处理（重定向）"><a href="#2、询问-是否其他类-可以-处理（重定向）" class="headerlink" title="2、询问 是否其他类 可以 处理（重定向）"></a>2、询问 是否其他类 可以 处理（重定向）</h3><p><code>forwardingTargetForSelector</code>。</p>
+<p>将不能处理的selector转由<code>其他对象</code> 处理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">- (id)forwardingTargetForSelector:(SEL)aSelector </div><div class="line">&#123;</div><div class="line">    NSLog(@&quot;%s&quot;,__func__);</div><div class="line">    if (aSelector == @selector(lowercaseString)) &#123;</div><div class="line">        return [NSString new];</div><div class="line">    &#125;</div><div class="line">    return [super forwardingTargetForSelector:aSelector];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="3、消息转发-流程"><a href="#3、消息转发-流程" class="headerlink" title="3、消息转发 流程"></a>3、消息转发 流程</h3><p>在1，2都失效的情况下，会进入到 <code>消息转发流程</code> ，这是 消息失败前的最后一次机会。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation</div></pre></td></tr></table></figure>
+<p><code>NSInvocation</code> 是唯一的入参，这个对象包含了原始的信息。</p>
+<p>通过<code>forwardInvocation</code> 可以为消息指定一个默认的处理者。</p>
+<p>这个转发流程，其实也是将 方法的调用，交由其他类去执行。与 2 不同的是，<code>forwardInvocation</code> 的参数是一个<code>NSInvocation</code>。</p>
+<p><code>forwardInvocation</code> 需要做两件事情：</p>
+<ol>
+<li>决定消息 去往哪里</li>
+<li>将 原始的参数一起传递过去</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation</div><div class="line">&#123;</div><div class="line">    if ([someOtherObject respondsToSelector:</div><div class="line">            [anInvocation selector]]) &#123;</div><div class="line">    	[anInvocation invokeWithTarget:someOtherObject];</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">    	[super forwardInvocation:anInvocation];</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>forwardInvocation</code> 方法 可以作为 <code>未知消息</code> 的 <code>分发中心</code>，将 未知消息 分配到 <code>不同的接收者</code>，或者 作为一个 <code>中转站</code>，将所有的消息，发给 同一个 目的地。</p>
+<p>在 <code>forwardInvocation</code> 之前，需要先去 判断 方法 是否已经通过 <code>签名</code>。</p>
+<p><code>methodSignatureForSelector</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector</div><div class="line">&#123;</div><div class="line">	NSMethodSignature *sig = [BBMessageForwardProxy instanceMethodSignatureForSelector:@selector(bb_dealNotRecognizedMessage:)];</div><div class="line">    return sig;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果 返回 nil，则转发终止。</p>
+<p>签名通过后，才调用 <code>forwardInvocation</code></p>
+<h3 id="整体流程图"><a href="#整体流程图" class="headerlink" title="整体流程图"></a>整体流程图</h3><p><img src="../../images/msg转发流程.png" alt="消息转发流程"></p>
 
       
     </div>
@@ -400,8 +413,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/17/OC-Runtime-二-类与对象/" rel="next" title="OC Runtime(二)类与对象">
-                <i class="fa fa-chevron-left"></i> OC Runtime(二)类与对象
+              <a href="/2017/05/19/OC-Runtime-四-方法与消息/" rel="next" title="OC Runtime(四)方法与消息">
+                <i class="fa fa-chevron-left"></i> OC Runtime(四)方法与消息
               </a>
             
           </div>
@@ -409,10 +422,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/05/19/RN-0-43后Text行数过长/" rel="prev" title="RN 0.43后Text行数过长">
-                RN 0.43后Text行数过长 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -539,7 +548,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#成员变量"><span class="nav-number">1.</span> <span class="nav-text">成员变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#属性"><span class="nav-number">2.</span> <span class="nav-text">属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关方法"><span class="nav-number">3.</span> <span class="nav-text">相关方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#消息转发机制"><span class="nav-number">1.</span> <span class="nav-text">消息转发机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、询问该类-能否动态添加-方法（动态方法解析）"><span class="nav-number">1.0.1.</span> <span class="nav-text">1、询问该类 能否动态添加 方法（动态方法解析）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、询问-是否其他类-可以-处理（重定向）"><span class="nav-number">1.0.2.</span> <span class="nav-text">2、询问 是否其他类 可以 处理（重定向）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、消息转发-流程"><span class="nav-number">1.0.3.</span> <span class="nav-text">3、消息转发 流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#整体流程图"><span class="nav-number">1.0.4.</span> <span class="nav-text">整体流程图</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -682,9 +691,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'http://yoursite.com/2017/05/18/OC-Runtime-三-成员变量与属性/';
-          this.page.identifier = '2017/05/18/OC-Runtime-三-成员变量与属性/';
-          this.page.title = 'OC Runtime(三)成员变量与属性';
+          this.page.url = 'http://yoursite.com/2017/06/01/OC-Runtime-五-消息转发机制/';
+          this.page.identifier = '2017/06/01/OC-Runtime-五-消息转发机制/';
+          this.page.title = 'OC-Runtime(五)消息转发机制';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://.disqus.com/embed.js';
