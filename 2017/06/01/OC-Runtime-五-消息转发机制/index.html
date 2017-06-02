@@ -90,17 +90,17 @@
 
 
 
-<meta name="description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。 1、询问该类 能否动态添加 方法（动态方法解析）resolveInstanceMethod 或 resolveClassMethod。给个机会，添加 处理函数。 12345678">
+<meta name="description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="OC-Runtime(五)消息转发机制">
 <meta property="og:url" content="http://yoursite.com/2017/06/01/OC-Runtime-五-消息转发机制/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
-<meta property="og:description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。 1、询问该类 能否动态添加 方法（动态方法解析）resolveInstanceMethod 或 resolveClassMethod。给个机会，添加 处理函数。 12345678">
+<meta property="og:description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。">
 <meta property="og:image" content="http://yoursite.com/2017/06/images/msg转发流程.png">
-<meta property="og:updated_time" content="2017-06-02T02:32:56.000Z">
+<meta property="og:updated_time" content="2017-06-02T03:18:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OC-Runtime(五)消息转发机制">
-<meta name="twitter:description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。 1、询问该类 能否动态添加 方法（动态方法解析）resolveInstanceMethod 或 resolveClassMethod。给个机会，添加 处理函数。 12345678">
+<meta name="twitter:description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。">
 <meta name="twitter:image" content="http://yoursite.com/2017/06/images/msg转发流程.png">
 
 
@@ -352,6 +352,7 @@
 
       
         <h1 id="消息转发机制"><a href="#消息转发机制" class="headerlink" title="消息转发机制"></a>消息转发机制</h1><p>正常情况下，我们向对象发送消息 <code>objc_sendMsg</code> 。首先在 <code>self</code> 中去查找，如果没有找到相应的 <code>selector</code> ，则通过 <code>isa</code> 去 <code>super</code> 中查找，如果仍然未查找到，则启动<code>消息转发机制</code> 。</p>
+<a id="more"></a>
 <h3 id="1、询问该类-能否动态添加-方法（动态方法解析）"><a href="#1、询问该类-能否动态添加-方法（动态方法解析）" class="headerlink" title="1、询问该类 能否动态添加 方法（动态方法解析）"></a>1、询问该类 能否动态添加 方法（动态方法解析）</h3><p><code>resolveInstanceMethod</code> 或 <code>resolveClassMethod</code>。给个机会，<code>添加</code> 处理函数。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void dynamicMethodIMP(id self, SEL _cmd) </div><div class="line">&#123;</div><div class="line">    // implementation ....</div><div class="line">&#125;</div><div class="line"></div><div class="line">+ (BOOL)resolveInstanceMethod:(SEL)aSEL</div><div class="line">&#123;</div><div class="line">    if (aSEL == @selector(changeName)) &#123;</div><div class="line">          class_addMethod([self class], aSEL, (IMP) dynamicMethodIMP, &quot;v@:&quot;);</div><div class="line">          return YES;</div><div class="line">    &#125;</div><div class="line">    return [super resolveInstanceMethod:aSEL];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>可以在此处 使用 <code>class_addMethod</code> 动态添加函数。</p>

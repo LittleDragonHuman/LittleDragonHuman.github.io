@@ -96,7 +96,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/05/16/NSUserDefaults/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
 <meta property="og:description" content="NSUserDefaults简介根据官方文档，翻译一下：类 NSUserDefaults 为与系统之间的交互提供了一个编程接口。系统允许应用程序去定制自己的行为来满足用户的喜好。比如说，你可以允许用户去决定文档自动保存的频率。应用程序通过在 用户默认的数据库中设置value 来记录这些喜好。这些参数在启用应用程序的时候，将被作为默认值。这些偏好设置记录在应用包的plist文件中。 举个例子：app">
-<meta property="og:updated_time" content="2017-06-02T02:33:21.000Z">
+<meta property="og:updated_time" content="2017-06-02T03:20:13.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NSUserDefaults">
 <meta name="twitter:description" content="NSUserDefaults简介根据官方文档，翻译一下：类 NSUserDefaults 为与系统之间的交互提供了一个编程接口。系统允许应用程序去定制自己的行为来满足用户的喜好。比如说，你可以允许用户去决定文档自动保存的频率。应用程序通过在 用户默认的数据库中设置value 来记录这些喜好。这些参数在启用应用程序的时候，将被作为默认值。这些偏好设置记录在应用包的plist文件中。 举个例子：app">
@@ -352,6 +352,7 @@
         <h1 id="NSUserDefaults"><a href="#NSUserDefaults" class="headerlink" title="NSUserDefaults"></a>NSUserDefaults</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>根据官方文档，翻译一下：类 <code>NSUserDefaults</code> 为与系统之间的交互提供了一个编程接口。系统允许应用程序去定制自己的行为来满足用户的喜好。比如说，你可以允许用户去决定文档自动保存的频率。应用程序通过在 <strong>用户默认的数据库中设置value</strong> 来记录这些喜好。这些参数在启用应用程序的时候，将被作为默认值。这些偏好设置记录在应用包的<code>plist</code>文件中。</p>
 <p>举个例子：app有一个弹红包的功能，只能在用户首次进入app的时候弹出。如何判断 用户是首次进入app呢？我们可以设置一个字段，当app打开时，取出该字段的值，判断是否是首次进入，判断完毕后，将该字段置为false，并存入到 <code>NSUserDefaults</code>。</p>
 <p>特点： 适合 存储 <strong>轻量级的本地数据</strong></p>
+<a id="more"></a>
 <h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p><code>NSUserDefaults</code> 是iOS系统提供的一个单例类，获取方式如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];</div></pre></td></tr></table></figure>
 <p><code>NSUserDefaults</code> 单例是以<code>key-value</code>形式存储一系列的偏好设置。<br>存取数据分别通过<code>setObject:forKey</code>和<code>objectForKey:</code>来存储/获取。这些对象将存储到相应的<code>plist</code>文件中。</p>

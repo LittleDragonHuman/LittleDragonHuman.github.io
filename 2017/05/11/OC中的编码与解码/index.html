@@ -96,7 +96,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/05/11/OC中的编码与解码/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
 <meta property="og:description" content="iOS9.0之前 stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc  提供2个主要的api, 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8StringEncodin">
-<meta property="og:updated_time" content="2017-06-02T02:32:42.000Z">
+<meta property="og:updated_time" content="2017-06-02T03:20:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OC中的编码与解码">
 <meta name="twitter:description" content="iOS9.0之前 stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc  提供2个主要的api, 分别是对 字符串 进行编码和解码，通常采用的编码方式为 NSUTF8StringEncodin">
@@ -358,6 +358,7 @@
 <p>打印出 utf8，结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%25q%23r%5Bs%5Dt%20&amp;u=%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22</div></pre></td></tr></table></figure></p>
 <p>分析结果和原始值，可以看出 api 只会对 <strong>%#[]空格中文`|&lt;&gt;{}\^”</strong> 进行编码。</p>
 <p>如果我们需要对特殊字符编码，怎么办呢？？<strong>参数单独编码</strong>，方法如下：</p>
+<a id="more"></a>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSString *after = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(nil, (CFStringRef)param, nil, (CFStringRef)@&quot;!*&apos;();:@&amp;=+$,/?%#[]&quot;, kCFStringEncodingUTF8));</div></pre></td></tr></table></figure>
 <p>打印结果如下：</p>
 <pre><code>a%21b%2Ac%27d%28e%29f%3Bg%3Ah%40i%26j%3Dk%2Bl%24m%2Cn%2Fo%3Fp%25q%23r%5Bs%5Dt%20%26u%3D%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22

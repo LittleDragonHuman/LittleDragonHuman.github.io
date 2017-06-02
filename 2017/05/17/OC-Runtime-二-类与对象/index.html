@@ -97,7 +97,7 @@
 <meta property="og:site_name" content="fly&#39;s blog">
 <meta property="og:description" content="在《简介》的最后部分，通过剖析 NSObject, 得出结构： 123@interface NSObject &amp;lt;NSObject&amp;gt; &amp;#123;    Class isa  OBJC_ISA_AVAILABILITY;&amp;#125; 进入到 Class 下，定义如下： 1typedef struct objc_class *Class; 到此，明白了 Objective－C 中的 类 ，">
 <meta property="og:image" content="http://yoursite.com/2017/05/images/isa+meta+super.jpg">
-<meta property="og:updated_time" content="2017-06-02T02:33:09.000Z">
+<meta property="og:updated_time" content="2017-06-02T03:19:46.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OC Runtime(二)类与对象">
 <meta name="twitter:description" content="在《简介》的最后部分，通过剖析 NSObject, 得出结构： 123@interface NSObject &amp;lt;NSObject&amp;gt; &amp;#123;    Class isa  OBJC_ISA_AVAILABILITY;&amp;#125; 进入到 Class 下，定义如下： 1typedef struct objc_class *Class; 到此，明白了 Objective－C 中的 类 ，">
@@ -357,6 +357,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_class *Class;</div></pre></td></tr></table></figure>
 <p>到此，明白了 <code>Objective－C</code> 中的 <code>类</code> ，其实是一个指向 <code>objc_class结构体</code> 的指针。</p>
 <p><code>Class isa</code> -&gt; <code>objc_class</code>;</p>
+<a id="more"></a>
 <p>对于 <code>实例对象</code>，其结构如下：</p>
 <p><code>id</code> -&gt; <code>objc_object</code> -&gt; <code>Class isa</code> -&gt; <code>objc_class</code>;</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_object *id;</div><div class="line"> </div><div class="line">struct objc_object &#123;</div><div class="line">    Class isa  OBJC_ISA_AVAILABILITY;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>

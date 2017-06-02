@@ -503,35 +503,14 @@
 
       
         
-          
-            <h1 id="消息转发机制"><a href="#消息转发机制" class="headerlink" title="消息转发机制"></a>消息转发机制</h1><p>正常情况下，我们向对象发送消息 <code>objc_sendMsg</code> 。首先在 <code>self</code> 中去查找，如果没有找到相应的 <code>selector</code> ，则通过 <code>isa</code> 去 <code>super</code> 中查找，如果仍然未查找到，则启动<code>消息转发机制</code> 。</p>
-<h3 id="1、询问该类-能否动态添加-方法（动态方法解析）"><a href="#1、询问该类-能否动态添加-方法（动态方法解析）" class="headerlink" title="1、询问该类 能否动态添加 方法（动态方法解析）"></a>1、询问该类 能否动态添加 方法（动态方法解析）</h3><p><code>resolveInstanceMethod</code> 或 <code>resolveClassMethod</code>。给个机会，<code>添加</code> 处理函数。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void dynamicMethodIMP(id self, SEL _cmd) </div><div class="line">&#123;</div><div class="line">    // implementation ....</div><div class="line">&#125;</div><div class="line"></div><div class="line">+ (BOOL)resolveInstanceMethod:(SEL)aSEL</div><div class="line">&#123;</div><div class="line">    if (aSEL == @selector(changeName)) &#123;</div><div class="line">          class_addMethod([self class], aSEL, (IMP) dynamicMethodIMP, &quot;v@:&quot;);</div><div class="line">          return YES;</div><div class="line">    &#125;</div><div class="line">    return [super resolveInstanceMethod:aSEL];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>可以在此处 使用 <code>class_addMethod</code> 动态添加函数。</p>
-<p>关于 <code>v@:</code> 将在后续的 <code>Type Encoding</code> 中介绍。</p>
-<h3 id="2、询问-是否其他类-可以-处理（重定向）"><a href="#2、询问-是否其他类-可以-处理（重定向）" class="headerlink" title="2、询问 是否其他类 可以 处理（重定向）"></a>2、询问 是否其他类 可以 处理（重定向）</h3><p><code>forwardingTargetForSelector</code>。</p>
-<p>将不能处理的selector转由<code>其他对象</code> 处理。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">- (id)forwardingTargetForSelector:(SEL)aSelector </div><div class="line">&#123;</div><div class="line">    NSLog(@&quot;%s&quot;,__func__);</div><div class="line">    if (aSelector == @selector(lowercaseString)) &#123;</div><div class="line">        return [NSString new];</div><div class="line">    &#125;</div><div class="line">    return [super forwardingTargetForSelector:aSelector];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="3、消息转发-流程"><a href="#3、消息转发-流程" class="headerlink" title="3、消息转发 流程"></a>3、消息转发 流程</h3><p>在1，2都失效的情况下，会进入到 <code>消息转发流程</code> ，这是 消息失败前的最后一次机会。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation</div></pre></td></tr></table></figure>
-<p><code>NSInvocation</code> 是唯一的入参，这个对象包含了原始的信息。</p>
-<p>通过<code>forwardInvocation</code> 可以为消息指定一个默认的处理者。</p>
-<p>这个转发流程，其实也是将 方法的调用，交由其他类去执行。与 2 不同的是，<code>forwardInvocation</code> 的参数是一个<code>NSInvocation</code>。</p>
-<p><code>forwardInvocation</code> 需要做两件事情：</p>
-<ol>
-<li>决定消息 去往哪里</li>
-<li>将 原始的参数一起传递过去</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation</div><div class="line">&#123;</div><div class="line">    if ([someOtherObject respondsToSelector:</div><div class="line">            [anInvocation selector]]) &#123;</div><div class="line">    	[anInvocation invokeWithTarget:someOtherObject];</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">    	[super forwardInvocation:anInvocation];</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p><code>forwardInvocation</code> 方法 可以作为 <code>未知消息</code> 的 <code>分发中心</code>，将 未知消息 分配到 <code>不同的接收者</code>，或者 作为一个 <code>中转站</code>，将所有的消息，发给 同一个 目的地。</p>
-<p>在 <code>forwardInvocation</code> 之前，需要先去 判断 方法 是否已经通过 <code>签名</code>。</p>
-<p><code>methodSignatureForSelector</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector</div><div class="line">&#123;</div><div class="line">	NSMethodSignature *sig = [BBMessageForwardProxy instanceMethodSignatureForSelector:@selector(bb_dealNotRecognizedMessage:)];</div><div class="line">    return sig;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>如果 返回 nil，则转发终止。</p>
-<p>签名通过后，才调用 <code>forwardInvocation</code></p>
-<h3 id="整体流程图"><a href="#整体流程图" class="headerlink" title="整体流程图"></a>整体流程图</h3><p><img src="../../images/msg转发流程.png" alt="消息转发流程"></p>
-
-          
+          <h1 id="消息转发机制"><a href="#消息转发机制" class="headerlink" title="消息转发机制"></a>消息转发机制</h1><p>正常情况下，我们向对象发送消息 <code>objc_sendMsg</code> 。首先在 <code>self</code> 中去查找，如果没有找到相应的 <code>selector</code> ，则通过 <code>isa</code> 去 <code>super</code> 中查找，如果仍然未查找到，则启动<code>消息转发机制</code> 。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/06/01/OC-Runtime-五-消息转发机制/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -673,64 +652,17 @@
 
       
         
-          
-            <h2 id="Method"><a href="#Method" class="headerlink" title="Method"></a>Method</h2><p>在 <code>objc_class</code> 结构体中，存在</p>
+          <h2 id="Method"><a href="#Method" class="headerlink" title="Method"></a>Method</h2><p>在 <code>objc_class</code> 结构体中，存在</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">struct objc_method_list **methodLists</div></pre></td></tr></table></figure>
 <p>这是个 方法定义的链表。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">struct objc_method_list &#123;</div><div class="line">    struct objc_method_list *obsolete  OBJC2_UNAVAILABLE;</div><div class="line">    int method_count                   OBJC2_UNAVAILABLE;</div><div class="line">#ifdef __LP64__</div><div class="line">    int space                          OBJC2_UNAVAILABLE;</div><div class="line">#endif</div><div class="line">    /* variable length structure */</div><div class="line">    struct objc_method method_list[1]  OBJC2_UNAVAILABLE;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p><code>method_list</code> 中的类型 为 <code>objc_method</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_method *Method;</div><div class="line"></div><div class="line">struct objc_method &#123;</div><div class="line">    SEL method_name            OBJC2_UNAVAILABLE;</div><div class="line">    char *method_types         OBJC2_UNAVAILABLE;</div><div class="line">    IMP method_imp             OBJC2_UNAVAILABLE;</div><div class="line">&#125;                              OBJC2_UNAVAILABLE;</div></pre></td></tr></table></figure>
-<p><code>method_name</code> ：方法名</p>
-<p><code>method_types</code> ：方法类型</p>
-<p><code>method_imp</code> ：方法的实现代码块地址</p>
-<h3 id="SEL"><a href="#SEL" class="headerlink" title="SEL"></a>SEL</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_selector *SEL;</div></pre></td></tr></table></figure>
-<p>可以理解 <code>objc_selector</code> 为一个 <code>char *</code>类型的字符串</p>
-<p>eg：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">SEL sel0 = @selector(lowercaseString);</div><div class="line">SEL sel1 = @selector(lowercaseStringWithLocale:);</div><div class="line">SEL sel2 = @selector(unarchiveTopLevelObjectWithData:error:);</div><div class="line"></div><div class="line">NSLog(@&quot;sel0 = %s&quot;, sel0);</div><div class="line">NSLog(@&quot;sel1 = %s&quot;, sel1);</div><div class="line">NSLog(@&quot;sel2 = %s&quot;, sel2);</div><div class="line"></div><div class="line">打印结果：</div><div class="line">sel0 = lowercaseString</div><div class="line">sel1 = lowercaseStringWithLocale:</div><div class="line">sel2 = unarchiveTopLevelObjectWithData:error:</div></pre></td></tr></table></figure>
-<p>由此可以看出，<code>SEL ＝ 方法名＋参数序列</code>。</p>
-<p>不同的类可以拥有相同的 <code>selector</code> ，不同类的实例对象 <code>performSelector</code> 相同的 <code>selector</code> 时，会在各自的方法链表中根据 <code>selector</code> 去查找具体的方法实现 <code>IMP</code>，然后用这个方法实现去执行 具体的实现代码。 </p>
-<p>这是一个 <code>动态绑定</code> 的过程，在编译的时候，并不知道最终会执行哪一些代码，只有在执行的时候，通过 <code>selector</code> 去查询，才能确定。</p>
-<h3 id="IMP"><a href="#IMP" class="headerlink" title="IMP"></a>IMP</h3><p>implementation的缩写，是 <code>Method中实现代码块的地址</code></p>
-<p>IMP指针：指向一个 <code>方法实现</code> 的指针。</p>
-<p>每个方法都对应着 一个 <code>IMP</code>。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/// A pointer to the function of a method implementation. </div><div class="line">#if !OBJC_OLD_DISPATCH_PROTOTYPES</div><div class="line">	typedef void (*IMP)(void /* id, SEL, ... */ ); </div><div class="line">#else</div><div class="line">	typedef id (*IMP)(id, SEL, ...); </div><div class="line">#endif</div></pre></td></tr></table></figure>
-<p>每个类存在一个<code>方法列表</code>，这个方法列表会把 <code>selector</code> 的名称 映射到 <code>相关的方法实现</code> 之上，使得 <code>动态消息派发系统</code> 能够根据此找到 应该调用的方法。这些方法 均以 <code>函数指针</code> 的形式表示，这种指针就叫做 <code>IMP</code> 。</p>
-<p>IMP与SEL的关系，盗图一张：</p>
-<p><img src="../../images/SEL与IMP.png" alt="SEL与IMP的关系"></p>
-<h3 id="相关方法"><a href="#相关方法" class="headerlink" title="相关方法"></a>相关方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">/* 获取方法名称 */</div><div class="line">SEL method_getName(Method m)</div><div class="line">/* 获取方法的实现 */</div><div class="line">IMP method_getImplementation(Method m) </div><div class="line">/* 获取方法参数的描述以及类型 */</div><div class="line">const char *method_getTypeEncoding(Method m) </div><div class="line">/* 返回方法可以接收的参数的个数 */</div><div class="line">unsigned int method_getNumberOfArguments(Method m) </div><div class="line">/* 返回方法返回类型的描述 */</div><div class="line">char *method_copyReturnType(Method m) </div><div class="line">/* 返回方法某个参数的描述 */</div><div class="line">method_copyArgumentType(Method m, unsigned int index) </div><div class="line">/* 返回方法的返回类型描述,reference */</div><div class="line">/* dst:存储描述的引用string */</div><div class="line">/* dst_len:可以存储描述的最大的字符数量 */</div><div class="line">void method_getReturnType(Method m, char *dst, size_t dst_len)</div><div class="line">/* 同method_copyArgumentType，使用dst去存储描述 */</div><div class="line">void method_getArgumentType(Method m, unsigned int index, char *dst, size_t dst_len) </div><div class="line">/* 设置 方法的实现 */</div><div class="line">IMP method_setImplementation(Method m, IMP imp)</div><div class="line">/* 交换两个方法的实现 */</div><div class="line">/* 原子版本： */</div><div class="line">/* IMP imp1 = method_getImplementation(m1); */</div><div class="line">/* IMP imp2 = method_getImplementation(m2); */</div><div class="line">/* method_setImplementation(m1, imp2); */</div><div class="line">/* method_setImplementation(m2, imp1);*/</div><div class="line">void method_exchangeImplementations(Method m1, Method m2)</div></pre></td></tr></table></figure>
-<h2 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h2><p>在Objective-C中，只有到<code>runtime</code>时，消息才会绑定到方法的实现上。在编译阶段，编译器将一个消息表达式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[receiver message];</div></pre></td></tr></table></figure>
-<p>转成 消息的方法：<code>objc_msgSend</code> 。这个方法会将 <code>接受者</code>，消息表达式中提到的方法名，也就是<code>selector</code>，作为objc_msdSend方法的主要两个参数：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">objc_msgSend(receiver, selector)</div></pre></td></tr></table></figure>
-<p>如果消息表达式带有参数，则处理如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">objc_msgSend(receiver, selector, arg1, arg2, ...)</div></pre></td></tr></table></figure>
-<p>消息方法 会在 <code>动态绑定</code> 阶段，完成必要的工作：</p>
-<ol>
-<li>找到selector指定的实现方法(implementation)。不同的类可以实现<code>相同</code>的方法，所以具体的执行方法要取决于<code>接收者的类</code>。</li>
-<li>调用程序，将接收者(指向数据的指针)以及参数传递给程序。</li>
-<li>最后，将程序的返回值作为自己的返回值 返回。</li>
-</ol>
-<p>ps: 编译器会生成消息的传递方法，我们要避免直接调用。</p>
-<p>消息传递的关键 在于 <code>编译器为每一个类和对象</code> 所构建出的结构。每一个类的结构里 都包含了两个 基本元素：</p>
-<ol>
-<li>指向super class的指针</li>
-<li>类的 dispatch table。这个 table里面 包含了 将 selector和其标识的方法的地址 关联起来的 条目。比如 setOrigin:的selector和setOrigin:的实现地址。</li>
-</ol>
-<p>盗图一张：</p>
-<p><img src="../../images/isa+msg.gif" alt="img"></p>
-<p>上图 展示的，就是在运行时动态选择方法的过程，即方法动态绑定到消息上。</p>
-<p>为了加快消息的过程，运行时系统会缓存 曾经用到的selector和方法的地址。</p>
-<h3 id="隐含参数"><a href="#隐含参数" class="headerlink" title="隐含参数"></a>隐含参数</h3><p>当 objc_msgSend 找到实现方法时，会调用 并传递 所有的参数，同时 包括2个隐含参数：</p>
-<ol>
-<li>接收对象 receiving object</li>
-<li>方法的selector</li>
-</ol>
-<p>之所以说是 <code>隐含参数</code>，是因为在 源码定义的方法中，并不声明他们，他们会在 <code>编译阶段</code>，加入到实现中。</p>
-<p>receiving object =&gt; self<br>selector =&gt; _cmd</p>
-<h3 id="获取方法地址"><a href="#获取方法地址" class="headerlink" title="获取方法地址"></a>获取方法地址</h3><p>规避 <code>动态绑定</code> 的唯一方法 就是 <code>获取 方法的地址</code>，然后直接调用。这种方式 适合 特定的方法已经成功执行多次，希望能避免每次方法执行的开销。</p>
-<p>通过方法methodForSelector:可以获取到指向实现方法过程的指针，然后通过该指针，调用过程。</p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/19/OC-Runtime-四-方法与消息/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1022,24 +954,16 @@
 
       
         
-          
-            <h2 id="成员变量"><a href="#成员变量" class="headerlink" title="成员变量"></a>成员变量</h2><p>继续分析 <code>objc_class</code> 结构体</p>
+          <h2 id="成员变量"><a href="#成员变量" class="headerlink" title="成员变量"></a>成员变量</h2><p>继续分析 <code>objc_class</code> 结构体</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">struct objc_ivar_list *ivars;</div><div class="line"></div><div class="line">struct objc_ivar_list &#123;</div><div class="line">    int ivar_count           OBJC2_UNAVAILABLE;</div><div class="line">#ifdef __LP64__</div><div class="line">    int space                OBJC2_UNAVAILABLE;</div><div class="line">#endif</div><div class="line">    /* variable length structure */</div><div class="line">    struct objc_ivar ivar_list[1]   OBJC2_UNAVAILABLE;</div><div class="line">&#125;                                                            OBJC2_UNAVAILABLE;</div><div class="line"></div><div class="line">// An opaque type that represents an instance variable.</div><div class="line"></div><div class="line">typedef struct objc_ivar *Ivar;</div><div class="line"></div><div class="line">struct objc_ivar &#123;</div><div class="line">    char *ivar_name    OBJC2_UNAVAILABLE;</div><div class="line">    char *ivar_type    OBJC2_UNAVAILABLE;</div><div class="line">    int ivar_offset    OBJC2_UNAVAILABLE;</div><div class="line">#ifdef __LP64__</div><div class="line">    int space          OBJC2_UNAVAILABLE;</div><div class="line">#endif</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p><code>Ivar</code> 代表的就是 实例变量的类型。<br><code>ivar_name</code> ：变量名<br><code>ivar_type</code> ：变量类型<br><code>ivar_offset</code> ：基地址偏移字节</p>
-<h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">/// An opaque type that represents an Objective-C declared property.</div><div class="line"></div><div class="line">typedef struct objc_property *objc_property_t;</div><div class="line"></div><div class="line">/// Defines a property attribute</div><div class="line">typedef struct &#123;</div><div class="line">    const char *name;    /**&lt; The name of the attribute */</div><div class="line">    const char *value;   /**&lt; The value of the attribute (usually empty) */</div><div class="line">&#125; objc_property_attribute_t;</div></pre></td></tr></table></figure>
-<h2 id="相关方法"><a href="#相关方法" class="headerlink" title="相关方法"></a>相关方法</h2><ul>
-<li>成员变量</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">const char *ivar_getName(Ivar v); //成员变量名称</div><div class="line">ptrdiff_t ivar_getOffset(Ivar v); //成员变量的偏移</div></pre></td></tr></table></figure>
-<ul>
-<li>属性</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">const char *property_getName(objc_property_t property); //获取属性名称</div><div class="line">const char *property_getAttributes(objc_property_t property); //获取属性的特性描述字符串</div><div class="line">objc_property_attribute_t *property_copyAttributeList(objc_property_t property, unsigned int *outCount); //返回一个属性的特性列表</div><div class="line">char *property_copyAttributeValue(objc_property_t property, const char *attributeName); //获取属性中指定的特性</div></pre></td></tr></table></figure>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="http://southpeak.github.io/2014/10/30/objective-c-runtime-2/" target="_blank" rel="external">Objective-C Runtime 运行时之二：成员变量与属性</a></li>
-</ul>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/18/OC-Runtime-三-成员变量与属性/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1181,61 +1105,19 @@
 
       
         
-          
-            <p>在《简介》的最后部分，通过剖析 <code>NSObject</code>, 得出结构：</p>
+          <p>在《简介》的最后部分，通过剖析 <code>NSObject</code>, 得出结构：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">@interface NSObject &lt;NSObject&gt; &#123;</div><div class="line">    Class isa  OBJC_ISA_AVAILABILITY;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>进入到 <code>Class</code> 下，定义如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_class *Class;</div></pre></td></tr></table></figure>
 <p>到此，明白了 <code>Objective－C</code> 中的 <code>类</code> ，其实是一个指向 <code>objc_class结构体</code> 的指针。</p>
 <p><code>Class isa</code> -&gt; <code>objc_class</code>;</p>
-<p>对于 <code>实例对象</code>，其结构如下：</p>
-<p><code>id</code> -&gt; <code>objc_object</code> -&gt; <code>Class isa</code> -&gt; <code>objc_class</code>;</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">typedef struct objc_object *id;</div><div class="line"> </div><div class="line">struct objc_object &#123;</div><div class="line">    Class isa  OBJC_ISA_AVAILABILITY;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
-<p><code>objc_class结构体</code> 中 又有什么呢？</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">struct objc_class &#123;</div><div class="line">    Class isa  OBJC_ISA_AVAILABILITY;</div><div class="line"></div><div class="line">#if !__OBJC2__</div><div class="line">    Class super_class          			     OBJC2_UNAVAILABLE;</div><div class="line">    const char *name           			     OBJC2_UNAVAILABLE;</div><div class="line">    long version               			     OBJC2_UNAVAILABLE;</div><div class="line">    long info                  		  	     OBJC2_UNAVAILABLE;</div><div class="line">    long instance_size         			     OBJC2_UNAVAILABLE;</div><div class="line">    struct objc_ivar_list *ivars       	     OBJC2_UNAVAILABLE;</div><div class="line">    struct objc_method_list **methodLists    OBJC2_UNAVAILABLE;</div><div class="line">    struct objc_cache *cache                 OBJC2_UNAVAILABLE;</div><div class="line">    struct objc_protocol_list *protocols     OBJC2_UNAVAILABLE;</div><div class="line">#endif</div><div class="line"></div><div class="line">&#125; OBJC2_UNAVAILABLE;</div></pre></td></tr></table></figure>
-<h3 id="isa-＝-gt-meta-class"><a href="#isa-＝-gt-meta-class" class="headerlink" title="isa ＝&gt; meta class"></a>isa ＝&gt; meta class</h3><p>对于实例对象，<code>isa</code> 指向 自己的 <code>类Class</code> 。</p>
-<p>eg：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Child *son = [Child new];</div><div class="line">[son sendMsg:@&quot;发消息&quot;];</div><div class="line">NSArray *array = [NSArray array];</div></pre></td></tr></table></figure>
-<p>在上面代码里，<code>son</code> 是个实例对象，在 <code>son</code> 的 <code>Class</code> 中的 <code>isa</code> 指向的，就是 <code>Child</code>，即 <code>类Class</code> 。</p>
-<p>在 OC中，所有的 <code>类Class</code> 也是一个 <code>对象</code> ，也存在一个指向 <code>objc_class的结构体</code> 的isa，那这个类Class中的isa指向的是谁呢？</p>
-<p>答：指向 <code>元类(meta class)</code> 。</p>
-<p>为什么会有这种 <code>元类</code> 呢？因为方法类型有两种，一种是 <code>实例方法</code> (例子中的第二行)，一种是 <code>类方法</code> (例子中的第三行)。</p>
-<p>对于 <strong>实例方法</strong>，执行方法即发送消息时，会根据 <code>son</code>的isa指针，找到<code>Child</code>，然后 查找 <code>methodLists</code> 以及 <code>super_class</code> ，找到最匹配的方法。</p>
-<p>对于 <strong>类方法</strong>，为了执行方法，必须使 NSArray中的isa指针，指向 <code>一个能包含 这些类方法的 objc_class结构体</code> 。这个能包含 <code>类方法</code> 的类，就是 <code>元类</code> 。所以，元类的定义为，<code>一个类对象的类</code> 。(这里之所以说是 类对象，是因为一个类也是一个对象)。</p>
-<p>那么，元类的isa，指向的又是谁呢？</p>
-<p>答：指向 <code>基类的meta class</code> ，即 NSObject的meta class。 NSObject的meta class 则 <code>指向自己</code>。</p>
-<p>综上，可以总结出两种方法执行的查找对象：</p>
-<p>向一个 对象发送消息，runtime 会在 对象的 <code>所属类</code> 的方法列表中查找。</p>
-<p>向一个 类发送消息，runtime会在 <code>类 的 meta class</code> 中的方法列表中去查找。</p>
-<h3 id="super-class"><a href="#super-class" class="headerlink" title="super_class"></a>super_class</h3><p>顾名思义，指向 <code>父类</code> ，对于元类也是如此。如果当前Class 已经是最顶层的类(NSObject/NSProxy)，则super_class 为 <code>nil</code>。</p>
-<p>综上，根据isa＋meta class＋super_class，盗图一张，更容易理解：</p>
-<p><img src="../../images/isa+meta+super.jpg" alt="isa+meta+super"></p>
-<h3 id="name"><a href="#name" class="headerlink" title="name"></a>name</h3><p>类名</p>
-<h3 id="version"><a href="#version" class="headerlink" title="version"></a>version</h3><p>类的版本信息</p>
-<h3 id="instance-size"><a href="#instance-size" class="headerlink" title="instance_size"></a>instance_size</h3><p>实例变量大小</p>
-<h3 id="cache"><a href="#cache" class="headerlink" title="cache"></a>cache</h3><p>用于缓存最近使用的方法。</p>
-<p>一个接收者对象接收到一个消息时，它会根据 <code>isa</code> 指针去查找能够响应这个消息的对象。</p>
-<p>在实际使用中，这个对象只有一部分方法是常用的，很多方法其实很少用或者根本用不上。这种情况下，如果每次消息来时，我们都是 <code>methodLists</code> 中遍历一遍，性能势必很差。这时，cache就派上用场了。</p>
-<p>在我们每次调用过一个方法后，这个方法就会被缓存到 <code>cache</code> 列表中，下次调用的时候 runtime就会优先去 <code>cache</code> 中查找 ，如果 <code>cache</code> 没有，才去 <code>methodLists</code> 中查找方法 。这样，对于那些经常用到的方法的调用，但提高了调用的效率。</p>
-<p>对应的结构体如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">struct objc_cache &#123;</div><div class="line">    unsigned int mask /* total = mask + 1 */  OBJC2_UNAVAILABLE;</div><div class="line">    unsigned int occupied                     OBJC2_UNAVAILABLE;</div><div class="line">    Method buckets[1]                         OBJC2_UNAVAILABLE;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
-<h3 id="操作方法"><a href="#操作方法" class="headerlink" title="操作方法"></a>操作方法</h3><ul>
-<li>类</li>
-</ul>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span> *class_getName(Class cls); <span class="comment">//获取类名</span></div><div class="line"><span class="built_in">BOOL</span> class_isMetaClass(Class cls); <span class="comment">//是否是 元类</span></div><div class="line">Class class_getSuperclass(Class cls); <span class="comment">//获取 父类</span></div><div class="line">Class class_setSuperclass(Class cls, Class newSuper); <span class="comment">//设置 父类，不推荐</span></div><div class="line"><span class="keyword">int</span> class_getVersion(Class cls); <span class="comment">//获取类的版本号</span></div><div class="line"><span class="keyword">void</span> class_setVersion(Class cls, <span class="keyword">int</span> version); <span class="comment">//设置类的版本号</span></div><div class="line">size_t class_getInstanceSize(Class cls); <span class="comment">//获取 类的实例大小</span></div></pre></td></tr></table></figure>
-<ul>
-<li>实例</li>
-</ul>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">Class object_getClass(<span class="keyword">id</span> obj); <span class="comment">//获取对象的类</span></div><div class="line">Class object_setClass(<span class="keyword">id</span> obj, Class cls) <span class="comment">//设置对象的类</span></div><div class="line"><span class="built_in">BOOL</span> object_isClass(<span class="keyword">id</span> obj); <span class="comment">//对象是否是一个类</span></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span> *object_getClassName(<span class="keyword">id</span> obj); <span class="comment">//获取对象的类名</span></div></pre></td></tr></table></figure>
-<p>eg:</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">SaveRecord *s0 = [SaveRecord new];</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"object_getClass = %@"</span>, object_getClass(s0));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"object_isClass = %@"</span>, @(object_isClass(s0)));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"object_getClassName = %@"</span>, [<span class="built_in">NSString</span> stringWithUTF8String:object_getClassName(s0)]);</div><div class="line">    </div><div class="line">Class <span class="keyword">class</span> = [SaveRecord <span class="keyword">class</span>];</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getName = %@"</span>, [<span class="built_in">NSString</span> stringWithUTF8String:class_getName(<span class="keyword">class</span>)]);</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_isMetaClass = %@"</span>, @(class_isMetaClass(<span class="keyword">class</span>)));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getSuperclass = %@"</span>, class_getSuperclass(<span class="keyword">class</span>));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getVersion = %@"</span>, @(class_getVersion(<span class="keyword">class</span>)));</div><div class="line"><span class="built_in">NSLog</span>(<span class="string">@"class_getInstanceSize = %@"</span>, @(class_getInstanceSize(<span class="keyword">class</span>)));</div></pre></td></tr></table></figure>
-<p>运行结果如下：</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.541</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] object_getClass = SaveRecord</div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.541</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] object_isClass = <span class="number">0</span></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.548</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] object_getClassName = SaveRecord</div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.548</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_getName = SaveRecord</div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.549</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_isMetaClass = <span class="number">0</span></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.549</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_getSuperclass = <span class="built_in">NSObject</span></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.550</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_getVersion = <span class="number">0</span></div><div class="line"><span class="number">2017</span><span class="number">-05</span><span class="number">-17</span> <span class="number">16</span>:<span class="number">49</span>:<span class="number">21.551</span> Test[<span class="number">70424</span>:<span class="number">916204</span>] class_getInstanceSize = <span class="number">24</span></div></pre></td></tr></table></figure>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
-<li><a href="http://southpeak.github.io/2014/10/25/objective-c-runtime-1/" target="_blank" rel="external">Objective-C Runtime 运行时之一：类与对象</a></li>
-</ul>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/17/OC-Runtime-二-类与对象/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1527,85 +1409,16 @@
 
       
         
-          
-            <h1 id="NSUserDefaults"><a href="#NSUserDefaults" class="headerlink" title="NSUserDefaults"></a>NSUserDefaults</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>根据官方文档，翻译一下：类 <code>NSUserDefaults</code> 为与系统之间的交互提供了一个编程接口。系统允许应用程序去定制自己的行为来满足用户的喜好。比如说，你可以允许用户去决定文档自动保存的频率。应用程序通过在 <strong>用户默认的数据库中设置value</strong> 来记录这些喜好。这些参数在启用应用程序的时候，将被作为默认值。这些偏好设置记录在应用包的<code>plist</code>文件中。</p>
+          <h1 id="NSUserDefaults"><a href="#NSUserDefaults" class="headerlink" title="NSUserDefaults"></a>NSUserDefaults</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>根据官方文档，翻译一下：类 <code>NSUserDefaults</code> 为与系统之间的交互提供了一个编程接口。系统允许应用程序去定制自己的行为来满足用户的喜好。比如说，你可以允许用户去决定文档自动保存的频率。应用程序通过在 <strong>用户默认的数据库中设置value</strong> 来记录这些喜好。这些参数在启用应用程序的时候，将被作为默认值。这些偏好设置记录在应用包的<code>plist</code>文件中。</p>
 <p>举个例子：app有一个弹红包的功能，只能在用户首次进入app的时候弹出。如何判断 用户是首次进入app呢？我们可以设置一个字段，当app打开时，取出该字段的值，判断是否是首次进入，判断完毕后，将该字段置为false，并存入到 <code>NSUserDefaults</code>。</p>
 <p>特点： 适合 存储 <strong>轻量级的本地数据</strong></p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p><code>NSUserDefaults</code> 是iOS系统提供的一个单例类，获取方式如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];</div></pre></td></tr></table></figure>
-<p><code>NSUserDefaults</code> 单例是以<code>key-value</code>形式存储一系列的偏好设置。<br>存取数据分别通过<code>setObject:forKey</code>和<code>objectForKey:</code>来存储/获取。这些对象将存储到相应的<code>plist</code>文件中。</p>
-<p><code>plist</code> 存储类型有以下几种：</p>
-<ul>
-<li>NSData</li>
-<li>NSString</li>
-<li>NSNumber</li>
-<li>NSDate</li>
-<li>NSArray</li>
-<li>NSDictionary</li>
-</ul>
-<p>如果是想存储 <code>plist</code> 文件不支持的类型，eg：图片，则可以先将该对象归档为 <code>NSData</code> 类型，然后再存入到 <code>plist</code> 文件中。</p>
-<p>对于 <code>NSArray</code> 和 <code>NSDictionary</code> ，他们的存储类型也应该是上述范围包括的。</p>
-<p><code>NSUserDefaults</code> 返回的value是 <code>不可变</code> 的，即使你设置的value是个可变类型。</p>
-<p>NSUserDefaults是<code>线程安全</code>的。</p>
-<h2 id="常用api"><a href="#常用api" class="headerlink" title="常用api"></a>常用api</h2><ul>
-<li>objectForKey:</li>
-<li>setObject:forKey: //一旦设置，异步同步</li>
-<li>removeObjectForKey:</li>
-<li>stringForKey:</li>
-<li>arrayForKey:</li>
-<li>dictionaryForKey:</li>
-<li>dataForKey:</li>
-<li>stringArrayForKey:</li>
-<li>integerForKey:</li>
-<li>floatForKey:</li>
-<li>doubleForKey:</li>
-<li>boolForKey:</li>
-<li>setInteger:forKey:</li>
-<li>setFloat:forKey:</li>
-<li>setDouble:forKey:</li>
-<li>setBool:forKey:</li>
-<li>synchronize</li>
-</ul>
-<blockquote>
-<p>-synchronize is deprecated and will be marked with the NS_DEPRECATED macro in a future release.</p>
-<p> -synchronize blocks the calling thread until all in-progress set operations have completed. This is no longer necessary. Replacements for previous uses of -synchronize depend on what the intent of calling synchronize was. If you synchronized…</p>
-<ul>
-<li>…before reading in order to fetch updated values: remove the synchronize call</li>
-<li>…after writing in order to notify another program to read: the other program can use KVO to observe the default without needing to notify</li>
-<li>…before exiting in a non-app (command line tool, agent, or daemon) process: call CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication)</li>
-<li>…for any other reason: remove </li>
-</ul>
-</blockquote>
-<p>我们在 set值后，并不会立即同步，可以调用 <code>synchronize</code> 去立即同步磁盘上的文件。并不建议这么做，这是一个性能问题。因为 <code>iOS</code> 自己会在合适的时期去 同步。</p>
-<h2 id="Nil-Or-NO-问题"><a href="#Nil-Or-NO-问题" class="headerlink" title="Nil Or NO 问题"></a>Nil Or NO 问题</h2><p>这是什么问题呢？举个例子。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">BOOL hasIn = [[NSUserDefaults standardUserDefaults] boolForKey:@&quot;hasIn&quot;];</div></pre></td></tr></table></figure>
-<p>上述代码中，从 <code>NSUserDefaults</code> 中取 <code>hasIn</code> 的值，返回类型为 <code>bool</code> 类型。</p>
-<p>如果我是第一次取这个值，本地数据库中 其实 是没有这个字段的，返回的为 <code>NO</code>。我怎么知道 它 返回的 应该是 <code>not value</code> 还是 <code>no</code> 呢？在 <code>swift</code> 中 可以使用 <code>optional可选类型</code>，在 <code>iOS</code> 中呢？可以使用 <code>registerDefaults</code> ，这又是个啥？引出 <code>域</code>。</p>
-<h2 id="域"><a href="#域" class="headerlink" title="域"></a>域</h2><p><code>NSUserDefaults</code> 数据库中其实是由多个层级的 <code>域</code> 组成，默认包含 <code>5个Domain</code> 。<code>域</code> 不仅仅用于简单的信息存储，还由其他的设计用途。</p>
-<ul>
-<li>NSArgumentDomain:参数域，优先级最高，所有的命令行参数都会存放在这个域中</li>
-<li>Application:应用域</li>
-<li>NSGlobalDomain:全局域</li>
-<li>Languages:语言域，地区、日期等</li>
-<li>NSRegistrationDomain:注册域，优先级最低</li>
-</ul>
-<p>app在使用 <code>setObject:forKey:</code> 的时候，都是在 <code>Application</code> 中存储。</p>
-<p>在使用 <code>objectForKey:</code> 的时候，搜索顺序 <code>从上到下</code> 。具体过程：</p>
-<p>默认情况下， <code>Application</code> 是空的，没有key也没有value。当应用第一次设置某项用户偏好设置的value时，相应的 <code>value</code> 会通过 <code>key</code> 加入 <code>Application</code> 。当通过 <code>NSUserDefaults</code> 获取某项用户偏好设置的 <code>value</code> 时， <code>NSUserDefaults</code> 会先在 <code>Application</code> 中查找，如果找到了 <code>value</code> ， <code>NSUserDefaults</code> 就会返回这个 <code>value</code> 。如果没有找到， <code>NSUserDefaults</code> 就会在 <code>NSRegistrationDomain</code> 中查找并返回默认值。</p>
-<h3 id="NSRegistrationDomain"><a href="#NSRegistrationDomain" class="headerlink" title="NSRegistrationDomain"></a>NSRegistrationDomain</h3><p>针对上面提到的问题，我们可以使用 <code>NSRegistrationDomain</code> 这个域来解决。</p>
-<p>使用 <code>registerDefaults</code> </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">[[NSUserDefaults standardUserDefaults] registerDefaults:@&#123;@&quot;maxCount&quot; : @3&#125;];</div></pre></td></tr></table></figure>
-<p>在获取 <code>value</code> 之前，先调用 <code>registerDefaults</code> 设置默认值，但是， <code>registerDefaults</code> 设置的默认值是 <code>不会持久化存储</code> 的，也就意味着每次启动app时，都要设置一遍。</p>
-<p>注意：需要在每次启动 <code>app</code> 并且没有在 <code>user defaults</code> 中读取数据的时候调用以上方法，因为 <code>registerDefaults:</code> 不能把这些默认数据存储到硬盘上，所以 <code>application:didFinishLaunchingWithOptions</code> 是最合适的地方。</p>
-<p>在 <code>application:didFinishLaunchingWithOptions</code> 地方去设置默认值，在其他地方使用时，取出值，并 <code>setObject</code>，这时 <code>key</code> 和 <code>value</code> 已经 存储到 <code>Application</code> 域中，下次可 正常使用。</p>
-<h3 id="NSArgumentDomain"><a href="#NSArgumentDomain" class="headerlink" title="NSArgumentDomain"></a>NSArgumentDomain</h3><p>命令行 方式 设置 value。</p>
-<p>例子：</p>
-<p><code>xcode</code> － <code>edit scheme</code> － <code>Arguments</code> － <code>Arguments Passed On Launch</code> － <code>-aString test</code> </p>
-<p>在app启动的时候，从 <code>NSUserDefaults</code> 中取出 <code>aString</code> ，打印结果为 <code>test</code> 。</p>
-<h3 id="Languages"><a href="#Languages" class="headerlink" title="Languages"></a>Languages</h3><p>每次在修改设备的语言设置时，系统都会在 <code>Languages</code> 中设置相应的字段，这个字段的 <code>key</code> 为 <code>AppleLanguages</code> 。</p>
-<p>我们也可以通过 <code>NSArgumentDomain</code> 命令行的方式，直接修改结果，<code>-AppleLanguages (zh-Hans)</code> （因为命令行域的优先级最高）</p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/16/NSUserDefaults/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1747,23 +1560,19 @@
 
       
         
-          
-            <p>之前看到别人的博客，表示羡慕，于是果断地创建了自己的博客。以下内容 是 hexo＋github＋NexT的搭建过程。</p>
+          <p>之前看到别人的博客，表示羡慕，于是果断地创建了自己的博客。以下内容 是 hexo＋github＋NexT的搭建过程。</p>
 <h2 id="github-Pages"><a href="#github-Pages" class="headerlink" title="github Pages"></a>github Pages</h2><p>首先，你得有个 <code>github</code> 账号。</p>
 <p><code>github Pages</code> 本来是用于介绍托管在github的项目的，可以用来搭建成一个博客。</p>
 <p>每个 <code>github</code> 账号只有一个仓库用来存放个人主页，而且仓库的名称必须为 <code>username/username.github.io</code> ，搭建博客完成后，我们可以直接通过 <code>http://username.github.io</code> 访问到个人主页。</p>
 <p>在个人的 <code>github</code> 上，创建一个新的 <code>repository</code> ，命名为 <code>username.github.io</code> ，此处的 <code>username</code> 便是你的帐号名称，最后的结果 为 <code>yourname/yourname.github.io</code>。</p>
 <p>记住 <strong>路径</strong>。</p>
-<h2 id="hexo"><a href="#hexo" class="headerlink" title="hexo"></a>hexo</h2><p><code>hexo</code> 的简介 以及 具体搭建，可以参照官网 <a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="external">Hexo</a></p>
-<p>如何将 <code>hexo</code> 和 <code>github</code> 绑定起来呢，主要通过 站点文件目录下的 <code>_config.yml</code> 文件。</p>
-<p>打开该文件，在文件 中的 <strong>#Deployment</strong> 中，添加如下代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">deploy:	  </div><div class="line">  type: git</div><div class="line">  repo: git@github.com:你的github账号/你的github账号.github.io.git</div><div class="line">branch: master</div></pre></td></tr></table></figure>
-<p>在执行命令 <code>hexo g -d</code> 后，<code>hexo g</code> 会生成一个静态网页(该网页可直接访问), <code>-d</code> 后，会使用 <code>git commit</code> 命令将静态网页到 <code>github</code> 上的 <code>master</code> 分支上，完成部署。</p>
-<p>刷新博客即可。</p>
-<h2 id="NexT"><a href="#NexT" class="headerlink" title="NexT"></a>NexT</h2><p><code>NexT</code> 是 <code>hexo</code> 的众多主题之一，参照官网 <a href="http://theme-next.iissnan.com/getting-started.html" target="_blank" rel="external">NexT</a>。</p>
-<p>￼</p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/11/hexo-github-NexT/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1905,8 +1714,7 @@
 
       
         
-          
-            <h3 id="iOS9-0之前"><a href="#iOS9-0之前" class="headerlink" title="iOS9.0之前"></a>iOS9.0之前</h3><ul>
+          <h3 id="iOS9-0之前"><a href="#iOS9-0之前" class="headerlink" title="iOS9.0之前"></a>iOS9.0之前</h3><ul>
 <li>stringByAddingPercentEscapesUsingEncoding:(NSStringEncoding)enc</li>
 <li>stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)enc</li>
 </ul>
@@ -1915,91 +1723,13 @@
 <p>打印出 utf8，结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a!b*c&apos;d(e)f;g:h@i&amp;j=k+l$m,n/o?p%25q%23r%5Bs%5Dt%20&amp;u=%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22</div></pre></td></tr></table></figure></p>
 <p>分析结果和原始值，可以看出 api 只会对 <strong>%#[]空格中文`|&lt;&gt;{}\^”</strong> 进行编码。</p>
 <p>如果我们需要对特殊字符编码，怎么办呢？？<strong>参数单独编码</strong>，方法如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSString *after = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(nil, (CFStringRef)param, nil, (CFStringRef)@&quot;!*&apos;();:@&amp;=+$,/?%#[]&quot;, kCFStringEncodingUTF8));</div></pre></td></tr></table></figure>
-<p>打印结果如下：</p>
-<pre><code>a%21b%2Ac%27d%28e%29f%3Bg%3Ah%40i%26j%3Dk%2Bl%24m%2Cn%2Fo%3Fp%25q%23r%5Bs%5Dt%20%26u%3D%E4%B8%AD%E6%96%87v%60w%7Cx%3Cy%3Ez%7B%7D%5C%5E%22
-</code></pre><p>分析 <strong>CFURLCreateStringByAddingPercentEscapes</strong>：生成一个字符串的副本，根据指定的 编码替换 等效百分比转义序列的某些字符。</p>
-<p>参数如下：</p>
-<ul>
-<li><p>CFAllocatorRef allocator</p>
-<ul>
-<li>用于为新CFString对象分配内存的分配器,传 <strong>NULL</strong> 或 <strong>kCFAllocatorDefault</strong> 来使用当前默认的分配器。</li>
-</ul>
-</li>
-<li><p>CFStringRef originalString</p>
-<ul>
-<li>要copy的原始字符串。</li>
-</ul>
-</li>
-<li><p>CFStringRef charactersToLeaveUnescaped</p>
-<ul>
-<li>想要保持原样的字符，传 <strong>NULL</strong> 指定所有非法字符都被转义。</li>
-</ul>
-</li>
-<li><p>CFStringRef legalURLCharactersToBeEscaped</p>
-<ul>
-<li>想要转义的非法字符，传 <strong>NULL</strong> 表示没有非法的字符要被转义。</li>
-</ul>
-</li>
-<li><p>CFStringEncoding encoding</p>
-<ul>
-<li>用于要翻译的编码</li>
-</ul>
-</li>
-</ul>
-<h3 id="iOS9-0之后"><a href="#iOS9-0之后" class="headerlink" title="iOS9.0之后"></a>iOS9.0之后</h3><p>上述两个api    将在9.0之后被废弃，取而代之的api分别为：</p>
-<ul>
-<li>stringByAddingPercentEncodingWithAllowedCharacters:(NSCharacterSet *)allowedCharacters</li>
-<li>stringByRemovingPercentEncoding</li>
-</ul>
-<p>这两个api在 <strong>iOS7</strong> 上已经生效。</p>
-<p>入参 <strong>allowedCharacters</strong> 表示 需要编码的字符，类型如下：</p>
-<ul>
-<li><p>URLUserAllowedCharacterSet</p>
-<ul>
-<li>“#%/:&lt;&gt;?@[]^`</li>
-</ul>
-</li>
-<li><p>URLPasswordAllowedCharacterSet</p>
-<ul>
-<li>“#%/:&lt;&gt;?@[]^`{|}</li>
-</ul>
-</li>
-<li><p>URLHostAllowedCharacterSet</p>
-<ul>
-<li>“#%/&lt;&gt;?@\^`{|}</li>
-</ul>
-</li>
-<li><p>URLPathAllowedCharacterSet</p>
-<ul>
-<li>“#%;&lt;&gt;?[]^`{|}</li>
-</ul>
-</li>
-<li><p>URLQueryAllowedCharacterSet</p>
-<ul>
-<li>“#%&lt;&gt;[]^`{|}</li>
-</ul>
-</li>
-<li><p>URLFragmentAllowedCharacterSet</p>
-<ul>
-<li>“#%&lt;&gt;[]^`{|}</li>
-</ul>
-</li>
-</ul>
-<h3 id="js中相关的编码"><a href="#js中相关的编码" class="headerlink" title="js中相关的编码"></a>js中相关的编码</h3><ul>
-<li>escape</li>
-</ul>
-<p>escape主要作用于 <strong>字符串</strong> 进行编码<br>对于url中的 <strong>:/?&amp;</strong> 是不会进行编码的</p>
-<ul>
-<li>encodeURI</li>
-</ul>
-<p>场景：适用于对 <strong>url</strong> 进行编码<br>特点：不会对 <strong>ASCII字母、数字、~!@#&gt;amp;*()=:/,;?+`</strong> 进行编码</p>
-<ul>
-<li>encodeURIComponent</li>
-</ul>
-<p>场景：适用于对 <strong>url</strong> 进行编码<br>特点：不会对 <strong>ASCII字母、数字、~!*()`</strong> 进行编码</p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/11/OC中的编码与解码/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
