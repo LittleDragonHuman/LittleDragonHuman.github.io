@@ -96,12 +96,12 @@
 <meta property="og:url" content="http://yoursite.com/2017/06/01/OC-Runtime-五-消息转发机制/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
 <meta property="og:description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。">
-<meta property="og:image" content="http://yoursite.com/2017/06/images/msg转发流程.png">
-<meta property="og:updated_time" content="2017-06-02T03:18:40.000Z">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/msg%E8%BD%AC%E5%8F%91%E6%B5%81%E7%A8%8B.png?raw=true">
+<meta property="og:updated_time" content="2017-09-09T07:49:21.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OC-Runtime(五)消息转发机制">
 <meta name="twitter:description" content="消息转发机制正常情况下，我们向对象发送消息 objc_sendMsg 。首先在 self 中去查找，如果没有找到相应的 selector ，则通过 isa 去 super 中查找，如果仍然未查找到，则启动消息转发机制 。">
-<meta name="twitter:image" content="http://yoursite.com/2017/06/images/msg转发流程.png">
+<meta name="twitter:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/msg%E8%BD%AC%E5%8F%91%E6%B5%81%E7%A8%8B.png?raw=true">
 
 
 
@@ -377,7 +377,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector</div><div class="line">&#123;</div><div class="line">	NSMethodSignature *sig = [BBMessageForwardProxy instanceMethodSignatureForSelector:@selector(bb_dealNotRecognizedMessage:)];</div><div class="line">    return sig;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>如果 返回 nil，则转发终止。</p>
 <p>签名通过后，才调用 <code>forwardInvocation</code></p>
-<h3 id="整体流程图"><a href="#整体流程图" class="headerlink" title="整体流程图"></a>整体流程图</h3><p><img src="../../images/msg转发流程.png" alt="消息转发流程"></p>
+<h3 id="整体流程图"><a href="#整体流程图" class="headerlink" title="整体流程图"></a>整体流程图</h3><p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/msg%E8%BD%AC%E5%8F%91%E6%B5%81%E7%A8%8B.png?raw=true" alt="消息转发流程"></p>
 
       
     </div>
