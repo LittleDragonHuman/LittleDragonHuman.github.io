@@ -96,12 +96,12 @@
 <meta property="og:url" content="http://yoursite.com/2017/05/17/OC-Runtime-二-类与对象/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
 <meta property="og:description" content="在《简介》的最后部分，通过剖析 NSObject, 得出结构： 123@interface NSObject &amp;lt;NSObject&amp;gt; &amp;#123;    Class isa  OBJC_ISA_AVAILABILITY;&amp;#125; 进入到 Class 下，定义如下： 1typedef struct objc_class *Class; 到此，明白了 Objective－C 中的 类 ，">
-<meta property="og:image" content="http://yoursite.com/2017/05/images/isa+meta+super.jpg">
-<meta property="og:updated_time" content="2017-06-02T03:19:46.000Z">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/isa+meta+super.jpg?raw=true">
+<meta property="og:updated_time" content="2017-09-09T07:56:45.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OC Runtime(二)类与对象">
 <meta name="twitter:description" content="在《简介》的最后部分，通过剖析 NSObject, 得出结构： 123@interface NSObject &amp;lt;NSObject&amp;gt; &amp;#123;    Class isa  OBJC_ISA_AVAILABILITY;&amp;#125; 进入到 Class 下，定义如下： 1typedef struct objc_class *Class; 到此，明白了 Objective－C 中的 类 ，">
-<meta name="twitter:image" content="http://yoursite.com/2017/05/images/isa+meta+super.jpg">
+<meta name="twitter:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/isa+meta+super.jpg?raw=true">
 
 
 
@@ -379,7 +379,7 @@
 <p>向一个 类发送消息，runtime会在 <code>类 的 meta class</code> 中的方法列表中去查找。</p>
 <h3 id="super-class"><a href="#super-class" class="headerlink" title="super_class"></a>super_class</h3><p>顾名思义，指向 <code>父类</code> ，对于元类也是如此。如果当前Class 已经是最顶层的类(NSObject/NSProxy)，则super_class 为 <code>nil</code>。</p>
 <p>综上，根据isa＋meta class＋super_class，盗图一张，更容易理解：</p>
-<p><img src="../../images/isa+meta+super.jpg" alt="isa+meta+super"></p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/isa+meta+super.jpg?raw=true" alt="isa+meta+super"></p>
 <h3 id="name"><a href="#name" class="headerlink" title="name"></a>name</h3><p>类名</p>
 <h3 id="version"><a href="#version" class="headerlink" title="version"></a>version</h3><p>类的版本信息</p>
 <h3 id="instance-size"><a href="#instance-size" class="headerlink" title="instance_size"></a>instance_size</h3><p>实例变量大小</p>
