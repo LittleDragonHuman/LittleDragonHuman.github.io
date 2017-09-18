@@ -1,0 +1,811 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="Push工作原理  塞班系统 push 有 3 个服务器，而 苹果push 只需要 1 个服务器，且 进行了 各种优化，相比之下，更省电省流量。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Push简介">
+<meta property="og:url" content="http://yoursite.com/2017/09/14/Push简介/index.html">
+<meta property="og:site_name" content="fly&#39;s blog">
+<meta property="og:description" content="Push工作原理  塞班系统 push 有 3 个服务器，而 苹果push 只需要 1 个服务器，且 进行了 各种优化，相比之下，更省电省流量。">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/%E8%8B%B9%E6%9E%9Cpush.jpg?raw=true">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/appPush.jpg?raw=true">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/%E5%AE%98%E6%96%B9push.jpg?raw=true">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/push%E7%8E%AF%E5%A2%831.jpg?raw=true">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/NWPusher.jpg?raw=true">
+<meta property="og:updated_time" content="2017-09-18T10:19:09.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Push简介">
+<meta name="twitter:description" content="Push工作原理  塞班系统 push 有 3 个服务器，而 苹果push 只需要 1 个服务器，且 进行了 各种优化，相比之下，更省电省流量。">
+<meta name="twitter:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/%E8%8B%B9%E6%9E%9Cpush.jpg?raw=true">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/09/14/Push简介/"/>
+
+
+
+
+
+  <title>Push简介 | fly's blog</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">fly's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/14/Push简介/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fly's blog">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fly's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Push简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-14T00:00:00+08:00">
+                2017-09-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/09/14/Push简介/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/09/14/Push简介/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="Push工作原理"><a href="#Push工作原理" class="headerlink" title="Push工作原理"></a>Push工作原理</h3><hr>
+
+<p><code>塞班系统 push</code> 有 <code>3</code> 个服务器，而 <code>苹果push</code> 只需要 <code>1</code> 个服务器，且 进行了 各种优化，相比之下，更省电省流量。</p>
+<a id="more"></a>
+<p><code>iOS</code> 的 push通道  是一个 <code>独立的</code> <code>长链接</code> 通道，这个通道 是由 <code>iOS系统</code> 独立维护。</p>
+<p>每个手机系统 在 开机之后，会有 一个后台的长链接，连到苹果的服务器。如下图 所示：</p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/%E8%8B%B9%E6%9E%9Cpush.jpg?raw=true" alt="苹果系统push"></p>
+<p>手机系统 启动 或 打开 app，会生成 唯一的一个 <code>token</code>。</p>
+<p>这个 <code>token</code> 可以发送到 自己的服务器，自己的服务器 获取到这个 <code>token</code> 后，并不能直接 推送到 手机，因为 <code>push通道</code> 是由 <code>苹果</code> 维护的。</p>
+<p>所以，我们需要将 <code>token+push内容</code>，推到 苹果的通道 <code>APNs</code>，<code>APNs</code> 再根据 <code>token</code> 定位到 <code>设备</code>，将 <code>push内容</code> 推给 设备，设备 根据 <code>token</code> 找到 <code>app</code>，将 通知 push到 具体的app。如图所示：</p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/appPush.jpg?raw=true" alt="appPush"></p>
+<p>官方示意图：</p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/%E5%AE%98%E6%96%B9push.jpg?raw=true" alt="官方push"></p>
+<h3 id="Push环境搭建"><a href="#Push环境搭建" class="headerlink" title="Push环境搭建"></a>Push环境搭建</h3><p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/push%E7%8E%AF%E5%A2%831.jpg?raw=true" alt="push环境1"></p>
+<p>准备工作：苹果开发者账号、bundleID、push Notification、证书</p>
+<h4 id="获取-deviceToken"><a href="#获取-deviceToken" class="headerlink" title="获取 deviceToken"></a>获取 <code>deviceToken</code></h4><p>根据流程，在代码中 注册push，一般放在 appdelegate 中 的 <code>didFinishLaunchingWithOptions</code>，下面代码以 <code>iOS8</code> 为参照：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">- (void)registerAPNs</div><div class="line">&#123;</div><div class="line">    //向用户 询问 权限</div><div class="line">    UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert categories:nil];</div><div class="line">    //向 用户 申请 权限，</div><div class="line">    //若允许，则回调在 didRegisterUserNotificationSettings 中</div><div class="line">    [[UIApplication sharedApplication] registerUserNotificationSettings:settings];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings</div><div class="line">&#123;</div><div class="line">    //向苹果apns服务器获取token</div><div class="line">    //回调在 didRegisterForRemoteNotificationsWithDeviceToken 和 didFailToRegisterForRemoteNotificationsWithError</div><div class="line">    [application registerForRemoteNotifications];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken</div><div class="line">&#123;</div><div class="line">    //获取到 token</div><div class="line">    NSString *tokenStr = [NSString stringWithFormat:@&quot;%@&quot;, deviceToken];</div><div class="line">    //使用手机调试</div><div class="line">    //打印结果，里面存在&lt;&gt;和空格，进行替换</div><div class="line">    tokenStr = [tokenStr stringByReplacingOccurrencesOfString:@&quot; &quot; withString:@&quot;&quot;];</div><div class="line">    tokenStr = [tokenStr stringByReplacingOccurrencesOfString:@&quot;&lt;&quot; withString:@&quot;&quot;];</div><div class="line">    tokenStr = [tokenStr stringByReplacingOccurrencesOfString:@&quot;&gt;&quot; withString:@&quot;&quot;];</div><div class="line">    //TODO，下一步，将 token 发送 到 自己的服务器</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error</div><div class="line">&#123;</div><div class="line">    NSLog(@&quot;%@&quot;, error);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>注册APNs，以 <code>iOS7</code> 和 <code>iOS8</code> 为分割线</p>
+<h4 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h4><p>能力有限，使用第三方 服务器，用于 模拟 向 苹果发送push</p>
+<p><code>NWPusher</code> ，github地址 <code>https://github.com/noodlewerk/NWPusher</code>，界面如下：</p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/NWPusher.jpg?raw=true" alt="NWPusher"></p>
+<p>alert：push弹框中显示的内容<br>badge：app icon上显示的数字<br>sound: push播放的声音</p>
+<h3 id="Push交互"><a href="#Push交互" class="headerlink" title="Push交互"></a>Push交互</h3><hr>
+
+<h4 id="获取push权限"><a href="#获取push权限" class="headerlink" title="获取push权限"></a>获取push权限</h4><p>iOS7和iOS8下 调用的 api不同</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#define SYSTEM_OS_VERSION_GREATER_EQUAL_TO(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)</div><div class="line"></div><div class="line">#define IS_IOS8_OR_LATER SYSTEM_OS_VERSION_GREATER_EQUAL_TO(@&quot;8.0&quot;)</div><div class="line"></div><div class="line">- (void)registerAPNs</div><div class="line">&#123;</div><div class="line">#ifdef __IPHONE_8_0</div><div class="line">    if (IS_IOS8_OR_LATER) &#123;</div><div class="line">        //向用户 询问 权限</div><div class="line">        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert categories:nil];</div><div class="line">        //向 用户 申请 权限,回调，若允许，则回调在 didRegisterUserNotificationSettings 中</div><div class="line">        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">#endif</div><div class="line">        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="Local-Push"><a href="#Local-Push" class="headerlink" title="Local Push"></a>Local Push</h4><p>与 remote Push 相对应（APNs），不需要 搭建 服务器。单一的网络通道。</p>
+<h5 id="基础用法"><a href="#基础用法" class="headerlink" title="基础用法"></a>基础用法</h5><p>例如，有一个 记录 用户打开app 记录日期 的功能，如果用户 1天没有打开app，可以采用local Push去提醒用户。</p>
+<p>提高日活。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];</div><div class="line">[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];</div><div class="line"> </div><div class="line">- (void)appDidEnterBackground</div><div class="line">&#123;</div><div class="line">    _localNotify = [[UILocalNotification alloc] init];</div><div class="line">    _localNotify.fireDate = [NSDate dateWithTimeIntervalSinceNow:3];</div><div class="line">    _localNotify.alertBody = @&quot;你已经3秒钟没有打开app了&quot;;</div><div class="line">    _localNotify.userInfo = @&#123;@&quot;key&quot; : @&quot;value&quot;&#125;;</div><div class="line">    </div><div class="line">    [[UIApplication sharedApplication] scheduleLocalNotification:_localNotify];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)appWillEnterForeground</div><div class="line">&#123;</div><div class="line">    [[UIApplication sharedApplication] cancelLocalNotification:_localNotify];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="Local-Remote-Push"><a href="#Local-Remote-Push" class="headerlink" title="Local + Remote Push"></a>Local + Remote Push</h5><p>配合 <code>Remote Push</code>，主要原因 是 <code>网络</code> 问题。一般 先 <code>local Push</code>，如果收到 <code>remote</code>，则用 <code>remote Push</code>。</p>
+<p><code>Local Push</code> 通道更快。</p>
+<p>iOS7 之前，苹果在app进入后台时，允许开启一个 <code>后台任务</code>，此时app可以继续运行 <code>10 分钟</code>，iOS7之后，时间缩短到 <code>3分钟</code>。</p>
+<p>如何 启用 <code>后台模式</code> ？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@implementation PushBackgroundTask</div><div class="line"></div><div class="line">+ (instancetype)sharedInstance</div><div class="line">&#123;</div><div class="line">    static PushBackgroundTask *instance = nil;</div><div class="line">    static dispatch_once_t onceToken;</div><div class="line">    dispatch_once(&amp;onceToken, ^&#123;</div><div class="line">        instance = [PushBackgroundTask new];</div><div class="line">    &#125;);</div><div class="line">    return instance;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)beginBackgroundTask</div><div class="line">&#123;</div><div class="line">    //启动后台任务</div><div class="line">    UIApplication *application = [UIApplication sharedApplication];</div><div class="line">    </div><div class="line">    //任务即将结束时会进入该方法</div><div class="line">    __block UIBackgroundTaskIdentifier identifier = [application beginBackgroundTaskWithExpirationHandler:^&#123;</div><div class="line">        [application endBackgroundTask:identifier];</div><div class="line">        identifier = UIBackgroundTaskInvalid;</div><div class="line">    &#125;];</div><div class="line">    </div><div class="line">    //启用循环，保证代码处于活跃状态</div><div class="line">    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</div><div class="line">        while (YES) &#123;</div><div class="line">            int remainingTime = [application backgroundTimeRemaining];</div><div class="line">            if (remainingTime &lt;=5 ) &#123;</div><div class="line">                //提前5s结束后台任务</div><div class="line">                break;</div><div class="line">            &#125;</div><div class="line">            NSLog(@&quot;remaining background Time = %@&quot;, @(remainingTime));</div><div class="line">            </div><div class="line">            [NSThread sleepForTimeInterval:1.0];</div><div class="line">        &#125;</div><div class="line">        [application endBackgroundTask:identifier];</div><div class="line">        identifier = UIBackgroundTaskInvalid;</div><div class="line">    &#125;);</div><div class="line">&#125;</div><div class="line">@end</div><div class="line"></div><div class="line">- (void)applicationDidEnterBackground:(UIApplication *)application &#123;</div><div class="line">    [[PushBackgroundTask sharedInstance] beginBackgroundTask];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在上述  启动 <code>后台任务</code> 后，我们可以将 服务端的push，用 local push 进行 推送。</p>
+<h3 id="Push业务功能"><a href="#Push业务功能" class="headerlink" title="Push业务功能"></a>Push业务功能</h3><hr>
+
+<p>payload：</p>
+<ol>
+<li>携带业务数据</li>
+<li>json格式</li>
+<li>有长度限制，iOS8之前，限制在256Byte，</li>
+</ol>
+<p>eg：一个日记 push，点击 push信息后，进入到 写日记vc，需要自定义协议</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">//新建一个 vc，命名为 DairyViewController，这就是 要跳转的vc</div><div class="line"></div><div class="line">//新建一个model，命名为 PushHandler，里面存放单例，以及 一个 解析push内容的方法</div><div class="line">//解析 push内容</div><div class="line">- (void)handlePushInfo:(NSDictionary *)info</div><div class="line">&#123;</div><div class="line">//    @&#123;@&quot;t&quot; : @&quot;jump&quot;,</div><div class="line">//      @&quot;p&quot; : @&quot;dairy&quot;&#125;</div><div class="line">    NSDictionary *customInfo = info[@&quot;aps&quot;][@&quot;custom&quot;];</div><div class="line">    NSString *t = customInfo[@&quot;t&quot;];</div><div class="line">    NSString *p = customInfo[@&quot;p&quot;];</div><div class="line">    if ([t isEqualToString:@&quot;jump&quot;] &amp;&amp;</div><div class="line">        [p isEqualToString:@&quot;dairy&quot;]) &#123;</div><div class="line">        DairyViewController *vc = [DairyViewController new];</div><div class="line">        if (_navigation) &#123;</div><div class="line">            [_navigation pushViewController:vc animated:YES];</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>寻找 push推送 的入口，有 <code>2</code> 个，</p>
+<p><code>- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions</code></p>
+<p><code>- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo</code>，该方法表明，app处于后台 <code>3分钟</code></p>
+<p>didFinishLaunchingWithOptions 在这个方法里面，有时候需要注意一下，因为推送会立即调用，一些ui操作可能还没有处理，可以延迟几秒钟。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions &#123;</div><div class="line">    </div><div class="line">    [self registerAPNs];</div><div class="line">    </div><div class="line">    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];</div><div class="line">    [self.window makeKeyAndVisible];</div><div class="line">    ViewController *rootVC = [[ViewController alloc] init];</div><div class="line">    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:rootVC];</div><div class="line">    self.window.rootViewController = nav;</div><div class="line">    </div><div class="line">    [PushHandler sharedInstance].navigation = nav;</div><div class="line">    NSDictionary *pushInfo = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];</div><div class="line">    [[PushHandler sharedInstance] handlePushInfo:pushInfo];</div><div class="line">    </div><div class="line">    return YES;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo</div><div class="line">&#123;</div><div class="line">    [[PushHandler sharedInstance] handlePushInfo:userInfo];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="iOS7下的静默push"><a href="#iOS7下的静默push" class="headerlink" title="iOS7下的静默push"></a>iOS7下的静默push</h3><hr>
+
+<p>允许服务器向客户端发起一个静默push，唤起app，保持 <code>30s</code>，app收到push时，没有任何操作，也没有下拉框，仅仅是为了唤起app。</p>
+<p>与 后台任务的区别：</p>
+<p>后台任务 是 app进入后台时，开启的 保持 3分钟</p>
+<p>静默push 是 将 app 唤醒，保持30秒，并不能总是被唤醒，被kill的就不可以</p>
+<p>eg：通过 静默push 唤醒 app，执行后台任务，下载内容，通过local push，发送通知 给用户</p>
+<p><code>- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler</code></p>
+<h3 id="iOS8-Push交互"><a href="#iOS8-Push交互" class="headerlink" title="iOS8 Push交互"></a>iOS8 Push交互</h3><hr>
+
+<p>变更点：</p>
+<ol>
+<li>开启方式：iOS8需要先用setting去换取权限</li>
+<li>交互：支持交互功能，内容展示+下拉动作</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#define Notification_Action_Follow_ID @&quot;Notification_Action_Follow_ID&quot;</div><div class="line">#define Notification_Action_Cancel_ID @&quot;Notification_Action_Cancel_ID&quot;</div><div class="line"></div><div class="line">#define Notification_Category_Follow @&quot;Notification_Category_Follow&quot;</div><div class="line"></div><div class="line">if (IS_IOS8_OR_LATER) &#123;</div><div class="line">        </div><div class="line">		//Action: 动作， Category：动作的集合，Setting：包含多个Category</div><div class="line">        </div><div class="line">        UIMutableUserNotificationAction *follow = [UIMutableUserNotificationAction new];</div><div class="line">        </div><div class="line">        follow.identifier = Notification_Action_Follow_ID; //id</div><div class="line">        </div><div class="line">        //激活模式</div><div class="line">        //UIUserNotificationActivationModeForeground:app前台处理</div><div class="line">        //UIUserNotificationActivationModeBackground:app不会被唤醒，后台执行任务</div><div class="line">        follow.activationMode = UIUserNotificationActivationModeBackground;</div><div class="line">        </div><div class="line">        follow.title = @&quot;关注&quot;;</div><div class="line">        </div><div class="line">        follow.destructive = NO; //按钮样式</div><div class="line">        </div><div class="line">        //手机处于锁屏状态时，如果有push，YES表示需要先解锁</div><div class="line">        [follow setAuthenticationRequired:NO];</div><div class="line">        </div><div class="line">        UIMutableUserNotificationAction *cancel = [UIMutableUserNotificationAction new];</div><div class="line">        cancel.identifier = Notification_Action_Cancel_ID;         	     cancel.activationMode = UIUserNotificationActivationModeBackground;</div><div class="line">        cancel.title = @&quot;取消&quot;;</div><div class="line">        cancel.destructive = YES; </div><div class="line">        [cancel setAuthenticationRequired:NO];</div><div class="line">        </div><div class="line">        UIMutableUserNotificationCategory *category = [UIMutableUserNotificationCategory new];</div><div class="line">        category.identifier = Notification_Category_Follow;</div><div class="line">        [category setActions:@[follow, cancel] forContext:UIUserNotificationActionContextDefault];</div><div class="line">        </div><div class="line">        NSSet *categories = [NSSet setWithObjects:category, nil];</div><div class="line">        </div><div class="line">        //向用户 询问 权限</div><div class="line">        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert categories:categories];</div><div class="line">        //向 用户 申请 权限,回调，若允许，则回调在 didRegisterUserNotificationSettings 中</div><div class="line">        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];</div><div class="line">    &#125;</div><div class="line"></div><div class="line">- (void)application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(NSDictionary *)userInfo withResponseInfo:(NSDictionary *)responseInfo completionHandler:(void(^)())completionHandler</div><div class="line">&#123;</div><div class="line">// push 格式</div><div class="line">//    &#123;</div><div class="line">//        &quot;aps&quot;:</div><div class="line">//        &#123;</div><div class="line">//            &quot;alert&quot;:&quot;iOS8 Push 下拉动作&quot;,</div><div class="line">//            &quot;category&quot;:&quot;Notification_Category_Follow&quot;</div><div class="line">//        &#125;</div><div class="line">//    &#125;</div><div class="line">    if ([identifier isEqualToString:Notification_Action_Follow_ID]) &#123;</div><div class="line">        NSLog(@&quot;follow&quot;);</div><div class="line">    &#125;</div><div class="line">    else if ([identifier isEqualToString:Notification_Action_Cancel_ID]) &#123;</div><div class="line">        NSLog(@&quot;cancel&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="VOIP-Push"><a href="#VOIP-Push" class="headerlink" title="VOIP Push"></a>VOIP Push</h3><hr>
+
+<p>语音和视频电话，eg：QQ或微信中的语音和视频。</p>
+<p>iOS8之前，如果想要保持程序在后台一直活跃，需要申请权限，程序常驻后台，这样才能收到电话，后台保持长链接，这样子会费电费流量。</p>
+<p>iOS8引入pushKit框架，一种新的push通知类型，即 <code>VOIP Push</code>。</p>
+<p>程序 不需要 一直在后台常驻，当有 <code>voip push</code> 时，唤醒程序，30s，在这30s内 可以从 <code>服务器</code> 获取 新数据，然后 再 生成 <code>local push</code> 去通知用户。</p>
+<p>与普通push的区别：默认行为里面时不会弹出通知的。</p>
+<p>相当于 与 普通push同级别，需要专门申请证书。</p>
+<p>只能被 VOIP类的应用 使用，审核也非常严格。</p>
+<p>remote push 不能被修改，local push可以修改。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">- (void)registerVOIPPush</div><div class="line">&#123;</div><div class="line">    if (IS_IOS8_OR_LATER) &#123;</div><div class="line">        //可以设置 在 主线程 中 执行逻辑</div><div class="line">        PKPushRegistry *reg = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];</div><div class="line">        reg.delegate = self;</div><div class="line">        reg.desiredPushTypes = [NSSet setWithObjects:PKPushTypeVoIP, nil];</div><div class="line">        </div><div class="line">        UIUserNotificationType type = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound;</div><div class="line">        UIUserNotificationSettings *setting = [UIUserNotificationSettings settingsForTypes:type categories:nil];</div><div class="line">        </div><div class="line">        [[UIApplication sharedApplication] registerUserNotificationSettings:setting];</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type</div><div class="line">&#123;</div><div class="line">    //收到 voip</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a href="http://www.imooc.com/video/15142" target="_blank" rel="external">iOS推送通知</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/14/iOS Audio/" rel="next" title="iOS Audio">
+                <i class="fa fa-chevron-left"></i> iOS Audio
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="fly's blog" />
+          <p class="site-author-name" itemprop="name">fly's blog</p>
+           
+              <p class="site-description motion-element" itemprop="description">女程序猿一枚</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Push工作原理"><span class="nav-number">1.</span> <span class="nav-text">Push工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Push环境搭建"><span class="nav-number">2.</span> <span class="nav-text">Push环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#获取-deviceToken"><span class="nav-number">2.1.</span> <span class="nav-text">获取 deviceToken</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务器"><span class="nav-number">2.2.</span> <span class="nav-text">服务器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Push交互"><span class="nav-number">3.</span> <span class="nav-text">Push交互</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#获取push权限"><span class="nav-number">3.1.</span> <span class="nav-text">获取push权限</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Local-Push"><span class="nav-number">3.2.</span> <span class="nav-text">Local Push</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#基础用法"><span class="nav-number">3.2.1.</span> <span class="nav-text">基础用法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Local-Remote-Push"><span class="nav-number">3.2.2.</span> <span class="nav-text">Local + Remote Push</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Push业务功能"><span class="nav-number">4.</span> <span class="nav-text">Push业务功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iOS7下的静默push"><span class="nav-number">5.</span> <span class="nav-text">iOS7下的静默push</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iOS8-Push交互"><span class="nav-number">6.</span> <span class="nav-text">iOS8 Push交互</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VOIP-Push"><span class="nav-number">7.</span> <span class="nav-text">VOIP Push</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">fly's blog</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://yoursite.com/2017/09/14/Push简介/';
+          this.page.identifier = '2017/09/14/Push简介/';
+          this.page.title = 'Push简介';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
