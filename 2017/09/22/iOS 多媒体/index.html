@@ -1,0 +1,847 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="多媒体涉及到的框架： AVKit -&amp;gt; AVFoundation -&amp;gt; CoreServices 图片如何实现 图片的采集 与 显示呢？分为 3种 情况。  拍照采集 选择1张图片 选择多张图片  拍照采集 和 选择1张图片  可以使用 iOS 提供的 UIImagePickerController 实现，需要注意 权限。 iOS10 之后，权限的设置 放在 info.plist 文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 多媒体">
+<meta property="og:url" content="http://yoursite.com/2017/09/22/iOS 多媒体/index.html">
+<meta property="og:site_name" content="fly&#39;s blog">
+<meta property="og:description" content="多媒体涉及到的框架： AVKit -&amp;gt; AVFoundation -&amp;gt; CoreServices 图片如何实现 图片的采集 与 显示呢？分为 3种 情况。  拍照采集 选择1张图片 选择多张图片  拍照采集 和 选择1张图片  可以使用 iOS 提供的 UIImagePickerController 实现，需要注意 权限。 iOS10 之后，权限的设置 放在 info.plist 文件">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/Audio.png?raw=true">
+<meta property="og:updated_time" content="2017-09-22T07:44:36.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS 多媒体">
+<meta name="twitter:description" content="多媒体涉及到的框架： AVKit -&amp;gt; AVFoundation -&amp;gt; CoreServices 图片如何实现 图片的采集 与 显示呢？分为 3种 情况。  拍照采集 选择1张图片 选择多张图片  拍照采集 和 选择1张图片  可以使用 iOS 提供的 UIImagePickerController 实现，需要注意 权限。 iOS10 之后，权限的设置 放在 info.plist 文件">
+<meta name="twitter:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/Audio.png?raw=true">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/09/22/iOS 多媒体/"/>
+
+
+
+
+
+  <title>iOS 多媒体 | fly's blog</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">fly's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/22/iOS 多媒体/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fly's blog">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fly's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS 多媒体</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-22T00:00:00+08:00">
+                2017-09-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/09/22/iOS 多媒体/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/09/22/iOS 多媒体/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>多媒体涉及到的框架：</p>
+<p>AVKit -&gt; AVFoundation -&gt; CoreServices</p>
+<h2 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h2><p>如何实现 图片的采集 与 显示呢？分为 3种 情况。</p>
+<ul>
+<li>拍照采集</li>
+<li>选择1张图片</li>
+<li>选择多张图片</li>
+</ul>
+<p><code>拍照采集</code> 和 <code>选择1张图片</code>  可以使用 iOS 提供的 <code>UIImagePickerController</code> 实现，需要注意 <code>权限</code>。</p>
+<p>iOS10 之后，权限的设置 放在 <code>info.plist</code> 文件中。</p>
+<a id="more"></a>
+<p>eg：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">//拍照</div><div class="line">- (void)cameraBtnClick</div><div class="line">&#123;</div><div class="line">    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) &#123;</div><div class="line">        AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];</div><div class="line">        if (status == AVAuthorizationStatusRestricted ||</div><div class="line">            status == AVAuthorizationStatusDenied) &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        self.pickVC.sourceType = UIImagePickerControllerSourceTypeCamera;</div><div class="line">        [self presentViewController:self.pickVC animated:YES completion:nil];</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@&quot;&quot; message:@&quot;摄像头不可用&quot; preferredStyle:UIAlertControllerStyleAlert];</div><div class="line"></div><div class="line">        UIAlertAction *cancel = [UIAlertAction actionWithTitle:@&quot;取消&quot; style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) &#123;</div><div class="line">            [self dismissViewControllerAnimated:self.pickVC completion:nil];</div><div class="line">        &#125;];</div><div class="line">        </div><div class="line">        [alert addAction:cancel];</div><div class="line">        [self presentViewController:alert animated:YES completion:nil];</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//选择单张图片</div><div class="line">- (void)photoBtnClick</div><div class="line">&#123;</div><div class="line">    self.pickVC.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;</div><div class="line">    [self presentViewController:self.pickVC animated:YES completion:nil];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>实现代理 <code>UIImagePickerControllerDelegate</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary&lt;NSString *,id&gt; *)info</div><div class="line">&#123;</div><div class="line">    [self dismissViewControllerAnimated: picker completion:nil];</div><div class="line">    UIImage *image = info[UIImagePickerControllerOriginalImage];</div><div class="line">    //TODO 显示图片</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker</div><div class="line">&#123;</div><div class="line">    [self dismissViewControllerAnimated: picker completion:nil];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>多张图片的采集，可以使用 <code>CTAssetsPickerController</code>，github地址 在参考部分，需要 <code>&lt;AssetsLibrary/AssetsLibrary.h&gt;</code> 和 <code>&lt;Photos/Photos.h&gt;</code></p>
+<p>具体使用方式如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">- (void)photosBtnClick</div><div class="line">&#123;</div><div class="line">    [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) &#123;</div><div class="line">        if (status != PHAuthorizationStatusAuthorized) &#123;</div><div class="line">            return ;</div><div class="line">        &#125;</div><div class="line">        dispatch_async(dispatch_get_main_queue(), ^&#123;</div><div class="line">            CTAssetsPickerController *picker = [[CTAssetsPickerController alloc] init];</div><div class="line">            picker.delegate = self;</div><div class="line">            //是否显示 选择的索引</div><div class="line">            picker.showsSelectionIndex = YES;</div><div class="line">            //相册类型 = 相机胶卷+自定义相册</div><div class="line">            picker.assetCollectionSubtypes = @[@(PHAssetCollectionSubtypeSmartAlbumUserLibrary),</div><div class="line">                                               @(PHAssetCollectionSubtypeAlbumRegular)];</div><div class="line">            //是否显示 空相册</div><div class="line">            picker.showsEmptyAlbums = NO;</div><div class="line">            [self presentViewController:picker animated:YES completion:nil];</div><div class="line">        &#125;);</div><div class="line">    &#125;];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>实现的代理如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">- (BOOL)assetsPickerController:(CTAssetsPickerController *)picker shouldSelectAsset:(PHAsset *)asset</div><div class="line">&#123;</div><div class="line">    if (picker.selectedAssets.count &gt; 10) &#123;</div><div class="line">        return NO;</div><div class="line">    &#125;</div><div class="line">    return YES;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)assetsPickerController:(CTAssetsPickerController *)picker didFinishPickingAssets:(NSArray&lt;PHAsset*&gt; *)assets</div><div class="line">&#123;</div><div class="line">    [picker dismissViewControllerAnimated:YES completion:nil];</div><div class="line">    [self.images removeAllObjects];</div><div class="line">    PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];</div><div class="line">    option.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;</div><div class="line">    option.resizeMode = PHImageRequestOptionsResizeModeExact;</div><div class="line">    for (NSInteger i = 0; i &lt; assets.count; i++) &#123;</div><div class="line">        [[PHImageManager defaultManager] requestImageDataForAsset:assets[i] options:option resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) &#123;</div><div class="line">            UIImage *image = [UIImage imageWithData:imageData];</div><div class="line">            [self.images addObject:image];</div><div class="line">            [self.collectionView reloadData];</div><div class="line">        &#125;];</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)assetsPickerControllerDidCancel:(CTAssetsPickerController *)picker</div><div class="line">&#123;</div><div class="line">    [picker dismissViewControllerAnimated:YES completion:nil];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>个别属性的定义，可以去 github上 查找。</p>
+<h2 id="音频"><a href="#音频" class="headerlink" title="音频"></a>音频</h2><h3 id="Audio框架"><a href="#Audio框架" class="headerlink" title="Audio框架"></a>Audio框架</h3><p>一个经典的音频播放流程如下：（以mp3为例）</p>
+<ol>
+<li>读取 Mp3 文件</li>
+<li>解析采样率、码率、时长等信息，分离MP3中的音频帧</li>
+<li>对分离出来的音频帧解码得到PCM数据</li>
+<li>对PCM数据进行音效处理（均衡器、混响器等，非必须）</li>
+<li>把PCM数据解码成音频信号</li>
+<li>把音频信号交给硬件播放</li>
+<li>重复1-6步直到播放完成</li>
+</ol>
+<p>iOS系统对上述的流程 进行了 封装，并提供不同层次的接口</p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/Audio.png?raw=true" alt="接口"></p>
+<h4 id="High-Level-Services"><a href="#High-Level-Services" class="headerlink" title="High-Level Services"></a>High-Level Services</h4><ul>
+<li>AVAudioPlayer/AVPlayer(AVFoundation)：高级接口，可以完成整个音频播放的过程（包括本地文件和网络流播放，第4步除外）</li>
+<li>Audio Queue Services：高级接口，可以进行录音和播放，可以完成播放流程中的第3、5、6步</li>
+<li>Extended Audio File Services：Audio File Services和Audio Converter services的结合体</li>
+<li>OpenAL：主要处理3D立体音效果</li>
+</ul>
+<h4 id="Mid-Level-Services"><a href="#Mid-Level-Services" class="headerlink" title="Mid-Level Services"></a>Mid-Level Services</h4><ul>
+<li>Audio Converter services：音频数据转换，可以完成播放流程中的第3步</li>
+<li>Audio File Services：读写音频数据，可以完成播放流程中的第2步</li>
+<li>Audio Unit Services：播放音频数据：可以完成播放流程中的第5步、第6步</li>
+<li>Audio Processing Graph Services：音效处理模块，可以完成播放流程中的第4步</li>
+<li>Audio File Stream Services：对音频进行解码，可以完成播放流程中的第2步</li>
+</ul>
+<h4 id="Low-Level-Services"><a href="#Low-Level-Services" class="headerlink" title="Low-Level Services"></a>Low-Level Services</h4><p>硬件上</p>
+<h4 id="获取音频文件信息"><a href="#获取音频文件信息" class="headerlink" title="获取音频文件信息"></a>获取音频文件信息</h4><p>引入 <code>&lt;AudioToolbox/AudioToolbox.h&gt;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">	NSString *audioPath = [[NSBundle mainBundle] pathForResource:@&quot;陈慧琳 - Love Paradise&quot; ofType:@&quot;mp3&quot;];</div><div class="line">    NSURL *audioPathUrl = [NSURL fileURLWithPath:audioPath];</div><div class="line">//打开</div><div class="line">    AudioFileID audioFile;</div><div class="line">    AudioFileOpenURL((__bridge CFURLRef)audioPathUrl, kAudioFileReadPermission, 0, &amp;audioFile);</div><div class="line">//读取</div><div class="line">    UInt32 dataSize = 0;</div><div class="line">    CFDictionaryRef dictionary;</div><div class="line">    AudioFileGetPropertyInfo(audioFile, kAudioFilePropertyInfoDictionary, &amp;dataSize, 0);</div><div class="line">    AudioFileGetProperty(audioFile, kAudioFilePropertyInfoDictionary, &amp;dataSize, &amp;dictionary);</div><div class="line">//打印</div><div class="line">    NSDictionary *audioDic = (__bridge NSDictionary *)dictionary;</div><div class="line">    for (int i = 0; i &lt; [audioDic allKeys].count; i++) &#123;</div><div class="line">        NSString *key = [[audioDic allKeys] objectAtIndex:i];</div><div class="line">        NSString *value = [audioDic valueForKey:key];</div><div class="line">        NSLog(@&quot;%@==%@&quot;, key, value);</div><div class="line">    &#125;</div><div class="line">//释放+关闭</div><div class="line">    CFRelease(dictionary);</div><div class="line">    AudioFileClose(audioFile);</div></pre></td></tr></table></figure>
+<p>打印结果；</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Test[65327:1721383] approximate duration in seconds==196.336</div><div class="line">Test[65327:1721383] title==Love Paradise</div><div class="line">Test[65327:1721383] album==Stylish Index(第2版)</div><div class="line">Test[65327:1721383] track number==17</div><div class="line">Test[65327:1721383] comments==163 key(Don&apos;t modify):L64FU3W4YxX3ZFTmbZ+8/Z0SwLInjM7EI+wjGA5TpPwjlU+MXfuS5dH41r8jvOW9ScYAMDv/ZiJF1N7NJ1tB5ykZB/0xy53H4BqVyrHQ1D3FxfDiFZUsLxcn6q5uvDjUh2/P9qE+8QhfXkMn30yWOdd+VJJS4cngSrCOH01A1fb1lHAcupD6szZuD/yQF/KEdaffeW/ZNyb/yI9b70F/e/l3fgWpZDdXiCMsyUkUGmLgiQ4UTVvAs6XYx4gq7LQPp8KHFv1ZcMSBtL5AWRr8zOJoj0aVlgR+aB1QiqcwMvCgIoVqcD4k0n0bHPD5UCqF2L12na0AeVuxkhHpKAIYo0/eOOrDfcOqh+d2xkdrWENIId/19AeIxRECxioOp9EjdM0MNdLRtXgn7GKC/edApQ0vmJbb7U+c82vQrWgeHIJnvFos1WoFzjBA29xy3c2WkKWCjGpnaamEDkQVZYVnJ2m+/FGuy/x+sYwNv8d38R2ssIuEsqccEDnPUv/kFIvb</div><div class="line">Test[65327:1721383] artist==陈慧琳</div></pre></td></tr></table></figure>
+<h3 id="Audio系统声音"><a href="#Audio系统声音" class="headerlink" title="Audio系统声音"></a>Audio系统声音</h3><p>Audio System Sound：必须是pcm编解码的音频数据，时间长度不超过30s，一般用于提示音。</p>
+<p>有三种模式：</p>
+<ul>
+<li>振动效果：只作用于iphone，在ipad 和 模拟器上 无效果</li>
+<li>systemSound：在手机 <strong>静音时无效果</strong></li>
+<li>alertSound：手机 <strong>静音时也有效果</strong></li>
+</ul>
+<h4 id="振动"><a href="#振动" class="headerlink" title="振动"></a>振动</h4><p>示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">NSString *device = [[UIDevice currentDevice] model];</div><div class="line">   if ([device isEqualToString:@&quot;iPhone&quot;]) &#123;</div><div class="line">       AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);</div><div class="line">   &#125;</div><div class="line">   else &#123;</div><div class="line">       UIAlertController *alertVC = [UIAlertController alertControllerWithTitle:@&quot;提示&quot; message:@&quot;设备不支持振动&quot; preferredStyle:UIAlertControllerStyleAlert];</div><div class="line">       UIAlertAction *cancel = [UIAlertAction actionWithTitle:@&quot;OK&quot; style:UIAlertActionStyleCancel handler:nil];</div><div class="line">       [alertVC addAction:cancel];</div><div class="line">       [self presentViewController:alertVC animated:YES completion:nil];</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<h4 id="systemSound"><a href="#systemSound" class="headerlink" title="systemSound"></a>systemSound</h4><p>示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">void soundFinishedPlay(SystemSoundID soundId, void* userData) &#123;</div><div class="line">//移出和销毁</div><div class="line">    AudioServicesRemoveSystemSoundCompletion(soundId);</div><div class="line">    AudioServicesDisposeSystemSoundID(soundId);</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)systemSound</div><div class="line">&#123;</div><div class="line">    NSURL *soundUrl = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@&quot;飞机&quot; ofType:@&quot;wav&quot;]];</div><div class="line">//创建id</div><div class="line">    SystemSoundID soundId;</div><div class="line">    AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain(soundUrl), &amp;soundId);</div><div class="line">//注册callback</div><div class="line">    AudioServicesAddSystemSoundCompletion(soundId, NULL, NULL, soundFinishedPlay, NULL);</div><div class="line">//播放</div><div class="line">    AudioServicesPlaySystemSound(soundId);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="alertSound"><a href="#alertSound" class="headerlink" title="alertSound"></a>alertSound</h4><p>alertSound 与 systemSound 的流程是一样的，只有最后一步播放 调用的方法不同，alertSound调用方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">AudioServicesPlayAlertSound(soundId);</div></pre></td></tr></table></figure>
+<h3 id="Audio播放"><a href="#Audio播放" class="headerlink" title="Audio播放"></a>Audio播放</h3><h4 id="音频编解码文件封装格式"><a href="#音频编解码文件封装格式" class="headerlink" title="音频编解码文件封装格式"></a>音频编解码文件封装格式</h4><h5 id="音频参数"><a href="#音频参数" class="headerlink" title="音频参数"></a>音频参数</h5><p>采样率：每1s中取样的数目，单位 <code>赫兹</code>，采样频率越高，声波频率越高。</p>
+<p>量化精度：量化精度越高，越接近原声，<code>模拟信号</code> 量化 为 <code>数字信号</code>，用 <code>比特</code> 表示</p>
+<p>比特率：数值信号 每秒钟 传递的 数据量</p>
+<p>eg：</p>
+<p>高质量音频：频率范围=20-20k，采样率=44.1，量化精度=16</p>
+<h5 id="编解码／封装格式"><a href="#编解码／封装格式" class="headerlink" title="编解码／封装格式"></a>编解码／封装格式</h5><p>编码方式 -&gt; 文件封装格式</p>
+<ul>
+<li>pcm -&gt; WAV：接近原声，数据量大</li>
+<li>aac -&gt; M4a：苹果为iOS系统定制，诺基亚也支持，音质较好</li>
+<li>mp3 -&gt; MP3</li>
+<li>ogg -&gt; Ogg</li>
+<li>Windows media audio -&gt; WMA</li>
+</ul>
+<p><code>pcm</code> 是量化后的第一手资料，<code>aac</code> 和 <code>mp3</code> 则在其基础上进行了一定的压缩操作。</p>
+<h4 id="Audio播放音乐"><a href="#Audio播放音乐" class="headerlink" title="Audio播放音乐"></a>Audio播放音乐</h4><p>system sound 有一定的局限性，比如 只能是 pcm编码，最多不超过30s。现在最多使用audio的framework进行播放。</p>
+<p>涉及到的Frameworks：</p>
+<ul>
+<li>全能型： AVFoundation.framework</li>
+<li>编解码： AudioToolBox.framework</li>
+<li>底层： AudioUnit.framework</li>
+<li>3D音效效果： OpenAL.framework</li>
+<li>提供丰富的控制类VC： MediaPlayer.framework</li>
+</ul>
+<h5 id="MediaPlayer-framework"><a href="#MediaPlayer-framework" class="headerlink" title="MediaPlayer.framework"></a>MediaPlayer.framework</h5><p>控制类播放音乐，最简单，有一个 已经封装好的控制视图，功能少，使用简单。</p>
+<p>MPMediaPickerController -&gt; MPMusicPlayerController</p>
+<p>eg:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">#import &lt;MediaPlayer/MediaPlayer.h&gt;</div><div class="line">#import &lt;AssetsLibrary/AssetsLibrary.h&gt;</div><div class="line"></div><div class="line">@property (nonatomic, strong) MPMediaPickerController *mediaPickerVC;</div><div class="line">@property (nonatomic, strong) MPMusicPlayerController *musicPlayerVC;</div><div class="line"></div><div class="line">- (void)mediaPlayer</div><div class="line">&#123;</div><div class="line">//取文件</div><div class="line">    self.mediaPickerVC = [[MPMediaPickerController alloc] initWithMediaTypes:MPMediaTypeAny];</div><div class="line">    self.mediaPickerVC.delegate = self;</div><div class="line">    self.mediaPickerVC.prompt = @&quot;请选择一个music&quot;;</div><div class="line">    [self presentViewController:self.mediaPickerVC animated:YES completion:nil];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker</div><div class="line">&#123;</div><div class="line">    [self dismissViewControllerAnimated:mediaPicker completion:nil];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)mediaPicker:(MPMediaPickerController *)mediaPicker didPickMediaItems:(MPMediaItemCollection *)mediaItemCollection</div><div class="line">&#123;</div><div class="line">//播文件</div><div class="line">    self.musicPlayerVC = [[MPMusicPlayerController alloc] init];</div><div class="line">    [self.musicPlayerVC setQueueWithItemCollection:mediaItemCollection];</div><div class="line">    [self.musicPlayerVC play];</div><div class="line">    </div><div class="line">    [self mediaPickerDidCancel:self.mediaPickerVC];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="AVFoundation-framework"><a href="#AVFoundation-framework" class="headerlink" title="AVFoundation.framework"></a>AVFoundation.framework</h5><h6 id="播放文件"><a href="#播放文件" class="headerlink" title="播放文件"></a>播放文件</h6><p>对一个mp3文件进行一些控制，代码示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">//加载音频文件</div><div class="line"> 	NSString *musicPath = [[NSBundle mainBundle] pathForResource:@&quot;陈慧琳 - Love Paradise&quot; ofType:@&quot;mp3&quot;];</div><div class="line">	if (!musicPath) &#123; </div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line">//播放</div><div class="line">//AVAudioSession的主要功能有：向系统说明你的app使用音频的模式、为你的app选择音频的输入输出设备、协助管理多个音源需要播放时的行为</div><div class="line">    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];</div><div class="line">    NSURL *musicUrl = [NSURL fileURLWithPath:musicPath];</div><div class="line">    </div><div class="line">    self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:musicUrl error:nil];</div><div class="line">    self.audioPlayer.delegate = self;</div><div class="line">    self.audioPlayer.meteringEnabled = YES; //是否启用音频测量，一旦启用，可以通过updateMeters更新测量值</div><div class="line">    self.timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(monitor) userInfo:nil repeats:YES];</div><div class="line">    [self.audioPlayer play];</div><div class="line"></div><div class="line">//暂停</div><div class="line">	if ([self.audioPlayer isPlaying]) &#123;</div><div class="line">        [self.audioPlayer pause];</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">        [self.audioPlayer play];</div><div class="line">    &#125;</div><div class="line"></div><div class="line">//停止</div><div class="line"> 	 self.playTime.value = 0; //更改播放时间控件值</div><div class="line">    self.progressView.progress = 0; //更改进度条控件值</div><div class="line">    [self.audioPlayer stop];</div><div class="line"></div><div class="line">//静音</div><div class="line">	self.audioPlayer.volume = [sender isOn];</div><div class="line">	</div><div class="line">//循环次数</div><div class="line">	self.audioPlayer.numberOfLoops = ((UIStepper *)sender).value;</div><div class="line"></div><div class="line">//音量</div><div class="line">    self.audioPlayer.volume = ((UISlider *)sender).value;</div><div class="line"></div><div class="line">//播放时间    </div><div class="line">    [self.audioPlayer pause];</div><div class="line">    [self.audioPlayer setCurrentTime:(NSTimeInterval)self.playTime.value * self.audioPlayer.duration];</div><div class="line">    [self.audioPlayer play];</div><div class="line"></div><div class="line">//检测播放信息</div><div class="line">//信道个数</div><div class="line">	NSUInteger channels = self.audioPlayer.numberOfChannels;</div><div class="line">    NSTimeInterval duration = self.audioPlayer.duration;</div><div class="line">    [self.audioPlayer updateMeters];</div><div class="line">    </div><div class="line">	//peakPowerForChannel:获得指定声道的分贝峰值，注意如果要获得分贝峰值必须在此之前调用updateMeters方法</div><div class="line">	</div><div class="line">    NSString *audioInfo = [NSString stringWithFormat:@&quot;左声道峰值 = %@\n右声道峰值 = %@\n通道个数 = %@\n播放时间 = %@\n当前时间 = %@\n&quot;, @([self.audioPlayer peakPowerForChannel:0]), @([self.audioPlayer peakPowerForChannel:0]), @(channels), @(duration), @(self.audioPlayer.currentTime)];</div><div class="line">    self.audioInfo.text = audioInfo;</div><div class="line">    self.progressView.progress = self.audioPlayer.currentTime / duration;</div></pre></td></tr></table></figure>
+<h6 id="语音识别"><a href="#语音识别" class="headerlink" title="语音识别"></a>语音识别</h6><p>iOS7之后，AVFoundation加入该功能。</p>
+<p>主要类：</p>
+<ul>
+<li><code>AVSpeechSynthesizer</code>：语音合成控制器</li>
+<li><code>AVSpeechUtterance</code>：语音合成基本单元</li>
+</ul>
+<p>完全是 一个 <code>离线的</code> 语音。与手机设置的 <code>语言&amp;区域</code> 有关，如果是英文，则无法读出中文，可以设置为中文。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">AVSpeechSynthesizer *speechManager = [[AVSpeechSynthesizer alloc] init];</div><div class="line">speechManager.delegate = self;</div><div class="line"></div><div class="line">AVSpeechUtterance *speech = [AVSpeechUtterance speechUtteranceWithString:@&quot;hello, AVFoundation。我是中国人&quot;];</div><div class="line">speech.rate = 0.5; //语速</div><div class="line"></div><div class="line">[speechManager speakUtterance:speech];</div></pre></td></tr></table></figure>
+<h3 id="录音"><a href="#录音" class="headerlink" title="录音"></a>录音</h3><p><code>AVAudioRecorder</code></p>
+<p>录音设置：采样率、录音格式、录音通道、录音质量。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">_recordSetting = @&#123;</div><div class="line">AVSampleRateKey : [NSNumber numberWithInt:44100],</div><div class="line">AVFormatIDKey : [NSNumber numberWithInt:kAudioFormatMPEG4AAC],</div><div class="line">AVNumberOfChannelsKey : [NSNumber numberWithInt:1],</div><div class="line">AVEncoderAudioQualityKey : [NSNumber numberWithInt:AVAudioQualityHigh]&#125;;</div><div class="line"></div><div class="line">NSString *fileName = [NSString stringWithFormat:@&quot;Documents/testRecord-%@&quot;, @(_nameEnd)];</div><div class="line"></div><div class="line">NSString *path = [NSHomeDirectory() stringByAppendingPathComponent:fileName];</div><div class="line">    </div><div class="line">_recorder = [[AVAudioRecorder alloc] initWithURL:[NSURL fileURLWithPath:path] settings:_recordSetting error:nil];</div><div class="line">    </div><div class="line">[_recorder prepareToRecord]; //准备录音</div><div class="line"></div><div class="line">if (_recorder.isRecording) &#123;</div><div class="line">	return;</div><div class="line">&#125;</div><div class="line">[_recorder record];</div><div class="line">[_recorder stop];</div></pre></td></tr></table></figure>
+<h6 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h6><p>注意点：</p>
+<ol>
+<li>volume在设置时，要先判断 是否是静音</li>
+<li>只能播放本地音乐，如果要播放网络音乐，可以 http持久化本地 或 通过 avplayer</li>
+</ol>
+<h2 id="视频"><a href="#视频" class="headerlink" title="视频"></a>视频</h2><p>使用 <code>UIImagePickerViewController</code> 录制，跟 图片的选取 一样的流程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">_pickerVC = [[UIImagePickerController alloc] init];</div><div class="line">_pickerVC.sourceType = UIImagePickerControllerSourceTypeCamera;</div><div class="line">_pickerVC.mediaTypes = @[(NSString *)kUTTypeMovie];</div><div class="line">_pickerVC.videoQuality = UIImagePickerControllerQualityTypeHigh;</div><div class="line">_pickerVC.delegate = self;</div><div class="line"></div><div class="line">NSString *type = info[UIImagePickerControllerMediaType];</div><div class="line">if ([type isEqualToString:(NSString *)kUTTypeMovie]) &#123;</div><div class="line">	self.mediaUrl = info[UIImagePickerControllerMediaURL];</div><div class="line">&#125;</div><div class="line">[self imagePickerControllerDidCancel:picker];</div></pre></td></tr></table></figure>
+<p>使用 <code>AVPlayerViewController</code> 播放。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">self.player = [[AVPlayerViewController alloc] init];</div><div class="line">self.player.player = [[AVPlayer alloc] initWithURL:_mediaUrl];</div><div class="line"></div><div class="line">//1.全屏，默认</div><div class="line">[self presentViewController:self.player animated:YES completion:nil];</div><div class="line">//2.小屏窗口</div><div class="line">self.player.view.frame = CGRectMake(10, 200, 100, 100);</div><div class="line">[self.view addSubview:self.player.view];</div><div class="line"> </div><div class="line">//播放   </div><div class="line">[self.player.player play];</div></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="http://www.jianshu.com/p/9c5f71759cfb" target="_blank" rel="external">iOS图片保存</a></li>
+<li><a href="https://github.com/chiunam/CTAssetsPickerController" target="_blank" rel="external">CTAssetsPickerController</a></li>
+<li><a href="http://www.jianshu.com/p/5d15ea654b8e" target="_blank" rel="external">仿微信</a></li>
+<li><a href="http://www.imooc.com/video/14948" target="_blank" rel="external">多媒体开发</a></li>
+<li><a href="https://maxwellqi.github.io/ios-audio-intro/" target="_blank" rel="external">音频基础知识</a></li>
+<li><a href="http://www.imooc.com/video/15647" target="_blank" rel="external">iOS开发之Audio特辑</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/19/基础多线程/" rel="next" title="基础多线程">
+                <i class="fa fa-chevron-left"></i> 基础多线程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="fly's blog" />
+          <p class="site-author-name" itemprop="name">fly's blog</p>
+           
+              <p class="site-description motion-element" itemprop="description">女程序猿一枚</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#图片"><span class="nav-number">1.</span> <span class="nav-text">图片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#音频"><span class="nav-number">2.</span> <span class="nav-text">音频</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Audio框架"><span class="nav-number">2.1.</span> <span class="nav-text">Audio框架</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#High-Level-Services"><span class="nav-number">2.1.1.</span> <span class="nav-text">High-Level Services</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Mid-Level-Services"><span class="nav-number">2.1.2.</span> <span class="nav-text">Mid-Level Services</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Low-Level-Services"><span class="nav-number">2.1.3.</span> <span class="nav-text">Low-Level Services</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取音频文件信息"><span class="nav-number">2.1.4.</span> <span class="nav-text">获取音频文件信息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Audio系统声音"><span class="nav-number">2.2.</span> <span class="nav-text">Audio系统声音</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#振动"><span class="nav-number">2.2.1.</span> <span class="nav-text">振动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#systemSound"><span class="nav-number">2.2.2.</span> <span class="nav-text">systemSound</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#alertSound"><span class="nav-number">2.2.3.</span> <span class="nav-text">alertSound</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Audio播放"><span class="nav-number">2.3.</span> <span class="nav-text">Audio播放</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#音频编解码文件封装格式"><span class="nav-number">2.3.1.</span> <span class="nav-text">音频编解码文件封装格式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#音频参数"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">音频参数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#编解码／封装格式"><span class="nav-number">2.3.1.2.</span> <span class="nav-text">编解码／封装格式</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Audio播放音乐"><span class="nav-number">2.3.2.</span> <span class="nav-text">Audio播放音乐</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#MediaPlayer-framework"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">MediaPlayer.framework</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AVFoundation-framework"><span class="nav-number">2.3.2.2.</span> <span class="nav-text">AVFoundation.framework</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#播放文件"><span class="nav-number">2.3.2.2.1.</span> <span class="nav-text">播放文件</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#语音识别"><span class="nav-number">2.3.2.2.2.</span> <span class="nav-text">语音识别</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#录音"><span class="nav-number">2.4.</span> <span class="nav-text">录音</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#小结"><span class="nav-number">2.4.0.0.1.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#视频"><span class="nav-number">3.</span> <span class="nav-text">视频</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">fly's blog</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://yoursite.com/2017/09/22/iOS 多媒体/';
+          this.page.identifier = '2017/09/22/iOS 多媒体/';
+          this.page.title = 'iOS 多媒体';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
