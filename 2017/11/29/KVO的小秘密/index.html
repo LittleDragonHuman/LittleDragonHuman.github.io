@@ -96,14 +96,14 @@
 <meta property="og:url" content="http://yoursite.com/2017/11/29/KVO的小秘密/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
 <meta property="og:description" content="提起KVO，首先想到的是，实现了观察者模式，Key-Value Observing。 为目标对象添加observers，目标对象会管理observers，当目标对象发生改变时，会通知observers 应用场景: 当我们想监听某个属性值的改变是，可以使用KVO，使用方式 12345678910111213141516171819- (void)viewDidLoad&amp;#123;    [super">
-<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/KVO-isa.png">
-<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/beforeAddObserver.png">
-<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/afterAddObserver.png">
-<meta property="og:updated_time" content="2017-11-29T06:24:05.000Z">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/KVO-isa.png?raw=true">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/beforeAddObserver.png?raw=true">
+<meta property="og:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/afterAddObserver.png?raw=true">
+<meta property="og:updated_time" content="2017-11-29T06:29:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="KVO的小秘密">
 <meta name="twitter:description" content="提起KVO，首先想到的是，实现了观察者模式，Key-Value Observing。 为目标对象添加observers，目标对象会管理observers，当目标对象发生改变时，会通知observers 应用场景: 当我们想监听某个属性值的改变是，可以使用KVO，使用方式 12345678910111213141516171819- (void)viewDidLoad&amp;#123;    [super">
-<meta name="twitter:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/KVO-isa.png">
+<meta name="twitter:image" content="https://github.com/LittleDragonHuman/MacDownImages/blob/master/KVO-isa.png?raw=true">
 
 
 
@@ -357,7 +357,9 @@
 <p>为目标对象添加observers，目标对象会管理observers，当目标对象发生改变时，会通知observers</p>
 <p>应用场景: 当我们想监听某个属性值的改变是，可以使用KVO，使用方式</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">- (void)viewDidLoad</div><div class="line">&#123;</div><div class="line">    [super viewDidLoad];</div><div class="line">    self.person = [[Person alloc] init];</div><div class="line">    </div><div class="line">    [self.person addObserver:self forKeyPath:@&quot;age&quot; options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];</div><div class="line">    </div><div class="line">    self.person.age = 50;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change context:(void *)context</div><div class="line">&#123;</div><div class="line">    NSLog(@&quot;%@&quot;,change);</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)dealloc</div><div class="line">&#123;</div><div class="line">    [self.person removeObserver:self forKeyPath:@&quot;age&quot;];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>上面是<code>自动触发</code>，如果要 <code>手动触发</code>呢？在官网中已给出</p>
+<p>上面是<code>自动触发</code>，如果要 <code>手动触发</code>呢？</p>
+<a id="more"></a>
+<p>在官网中已给出</p>
 <p><a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/KeyValueObserving/Articles/KVOCompliance.html#//apple_ref/doc/uid/20002178-SW3" target="_blank" rel="external">https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/KeyValueObserving/Articles/KVOCompliance.html#//apple_ref/doc/uid/20002178-SW3</a></p>
 <p>重写<code>NSObject+NSKeyValueObservingCustomization</code>中的<code>automaticallyNotifiesObserversForKey</code>方法，然后复写setter方法，将<code>NSObject+NSKeyValueObserverNotification</code>中的<code>willChangeValueForKey</code>和<code>didChangeValueForKey</code>插入到setter中。</p>
 <p><code>automaticallyNotifiesObserversForKey</code>：根据key去判断是否需要手动通知</p>
@@ -370,11 +372,11 @@
 <p><code>automaticallyNotifiesObserversForKey</code> -&gt; <code>willChangeValueForKey</code> -&gt; <code>observeValueForKeyPath</code> -&gt; <code>didChangeValueForKey</code>。</p>
 <p>apple用什么方式实现对一个对象的KVO，即实现KVO的技术或原理？<code>isa-swizzing</code>。</p>
 <p>什么是 <code>isa-swizzing</code>？跟 <code>method-swizzing</code> 一样，在运行时，对isa进行了替换。</p>
-<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/KVO-isa.png" alt="KVO-isa"></p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/KVO-isa.png?raw=true" alt="KVO-isa"></p>
 <p>继续使用上面例子，通过断点进行分析。</p>
-<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/beforeAddObserver.png" alt="添加observer之前"></p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/beforeAddObserver.png?raw=true" alt="添加observer之前"></p>
 <p>在对person添加observer之前，person中的isa，指向的是<code>Person</code>类</p>
-<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/afterAddObserver.png" alt="添加boserver之后"></p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/afterAddObserver.png?raw=true" alt="添加boserver之后"></p>
 <p>添加observer之后，person中的isa，指向<code>NSKVONotifying_Person</code>类，这个类是系统在运行时动态创建的中间类，在这个类中，系统帮我们重写了setter方法，在setter方法中添加了<code>willChangeValueForKey</code>和<code>didChangeValueForKey</code>。</p>
 <p>移除observer之后，person中的isa，会重新指向原类。</p>
 <h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
