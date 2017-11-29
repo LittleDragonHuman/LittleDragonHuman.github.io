@@ -253,6 +253,179 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/29/KVO的小秘密/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fly's blog">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fly's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/29/KVO的小秘密/" itemprop="url">KVO的小秘密</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-29T00:00:00+08:00">
+                2017-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/11/29/KVO的小秘密/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/11/29/KVO的小秘密/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>提起KVO，首先想到的是，实现了观察者模式，<code>Key-Value Observing</code>。</p>
+<p>为目标对象添加observers，目标对象会管理observers，当目标对象发生改变时，会通知observers</p>
+<p>应用场景: 当我们想监听某个属性值的改变是，可以使用KVO，使用方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">- (void)viewDidLoad</div><div class="line">&#123;</div><div class="line">    [super viewDidLoad];</div><div class="line">    self.person = [[Person alloc] init];</div><div class="line">    </div><div class="line">    [self.person addObserver:self forKeyPath:@&quot;age&quot; options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];</div><div class="line">    </div><div class="line">    self.person.age = 50;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change context:(void *)context</div><div class="line">&#123;</div><div class="line">    NSLog(@&quot;%@&quot;,change);</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)dealloc</div><div class="line">&#123;</div><div class="line">    [self.person removeObserver:self forKeyPath:@&quot;age&quot;];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面是<code>自动触发</code>，如果要 <code>手动触发</code>呢？在官网中已给出</p>
+<p><a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/KeyValueObserving/Articles/KVOCompliance.html#//apple_ref/doc/uid/20002178-SW3" target="_blank" rel="external">https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/KeyValueObserving/Articles/KVOCompliance.html#//apple_ref/doc/uid/20002178-SW3</a></p>
+<p>重写<code>NSObject+NSKeyValueObservingCustomization</code>中的<code>automaticallyNotifiesObserversForKey</code>方法，然后复写setter方法，将<code>NSObject+NSKeyValueObserverNotification</code>中的<code>willChangeValueForKey</code>和<code>didChangeValueForKey</code>插入到setter中。</p>
+<p><code>automaticallyNotifiesObserversForKey</code>：根据key去判断是否需要手动通知</p>
+<p><code>willChangeValueForKey</code>：用于保存旧值</p>
+<p><code>didChangeValueForKey</code>：用于保存新值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">+ (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key</div><div class="line">&#123;</div><div class="line">    BOOL automatic = NO;</div><div class="line">    if ([key isEqualToString:@&quot;age&quot;]) &#123;</div><div class="line">        automatic = NO;</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">        automatic = [super automaticallyNotifiesObserversForKey:key];</div><div class="line">    &#125;</div><div class="line">    NSLog(@&quot;automatic = %@&quot;,@(automatic));</div><div class="line">    return automatic;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)setAge:(NSInteger)age</div><div class="line">&#123;</div><div class="line">    if (age != _age) &#123;</div><div class="line">        NSLog(@&quot;willChangeValueForKey&quot;);</div><div class="line">        [self willChangeValueForKey:@&quot;age&quot;];</div><div class="line">        _age = age;</div><div class="line">        [self didChangeValueForKey:@&quot;age&quot;];</div><div class="line">        NSLog(@&quot;didChangeValueForKey&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>若是多个属性值改变，则 <code>多个will -&gt; 多个值改变 -&gt; 多个did</code></p>
+<p>根据打印log，看出运行流程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">2017-11-29 13:53:45.476144+0800 Test[8176:16204524] automatic = 0</div><div class="line">2017-11-29 13:53:45.478062+0800 Test[8176:16204524] willChangeValueForKey</div><div class="line">2017-11-29 13:53:45.478655+0800 Test[8176:16204524] &#123;</div><div class="line">    kind = 1;</div><div class="line">    new = 50;</div><div class="line">    old = 0;</div><div class="line">&#125;</div><div class="line">2017-11-29 13:53:45.478821+0800 Test[8176:16204524] didChangeValueForKey</div></pre></td></tr></table></figure>
+<p><code>automaticallyNotifiesObserversForKey</code> -&gt; <code>willChangeValueForKey</code> -&gt; <code>observeValueForKeyPath</code> -&gt; <code>didChangeValueForKey</code>。</p>
+<p>apple用什么方式实现对一个对象的KVO，即实现KVO的技术或原理？<code>isa-swizzing</code>。</p>
+<p>什么是 <code>isa-swizzing</code>？跟 <code>method-swizzing</code> 一样，在运行时，对isa进行了替换。</p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/KVO-isa.png" alt="KVO-isa"></p>
+<p>继续使用上面例子，通过断点进行分析。</p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/beforeAddObserver.png" alt="添加observer之前"></p>
+<p>在对person添加observer之前，person中的isa，指向的是<code>Person</code>类</p>
+<p><img src="https://github.com/LittleDragonHuman/MacDownImages/blob/master/afterAddObserver.png" alt="添加boserver之后"></p>
+<p>添加observer之后，person中的isa，指向<code>NSKVONotifying_Person</code>类，这个类是系统在运行时动态创建的中间类，在这个类中，系统帮我们重写了setter方法，在setter方法中添加了<code>willChangeValueForKey</code>和<code>didChangeValueForKey</code>。</p>
+<p>移除observer之后，person中的isa，会重新指向原类。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a href="http://ios.jobbole.com/88471/" target="_blank" rel="external">isa-swizzling 是什么鬼？</a></li>
+<li><a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/KeyValueObserving/Articles/KVOImplementation.html#//apple_ref/doc/uid/20002307-BAJEAIEE" target="_blank" rel="external">官方</a></li>
+<li><a href="https://github.com/ChenYilong/iOSInterviewQuestions/blob/master/01%E3%80%8A%E6%8B%9B%E8%81%98%E4%B8%80%E4%B8%AA%E9%9D%A0%E8%B0%B1%E7%9A%84iOS%E3%80%8B%E9%9D%A2%E8%AF%95%E9%A2%98%E5%8F%82%E8%80%83%E7%AD%94%E6%A1%88/%E3%80%8A%E6%8B%9B%E8%81%98%E4%B8%80%E4%B8%AA%E9%9D%A0%E8%B0%B1%E7%9A%84iOS%E3%80%8B%E9%9D%A2%E8%AF%95%E9%A2%98%E5%8F%82%E8%80%83%E7%AD%94%E6%A1%88%EF%BC%88%E4%B8%8B%EF%BC%89.md" target="_blank" rel="external">招聘一个靠谱的iOS</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/22/iOS 多媒体/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1612,156 +1785,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/17/OC-Runtime-一-简介/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="fly's blog">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="fly's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/17/OC-Runtime-一-简介/" itemprop="url">OC Runtime(一)简介</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-17T15:32:31+08:00">
-                2017-05-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/OC-Runtime/" itemprop="url" rel="index">
-                    <span itemprop="name">OC Runtime</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/05/17/OC-Runtime-一-简介/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/17/OC-Runtime-一-简介/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>翻译官方文档：</p>
-<p><code>Objective-C</code> 语言 将很多决定从编译阶段、链接阶段 推迟到运行时，只要有可能，它就会动态的去做事情。这就意味着，这门语言需要的不仅仅是一个编译器，同时还需要一个运行系统去执行编译过的代码。运行时系统就像是 <code>Objective-C</code> 语言的操作系统。<br>接下来将介绍类 <code>NSObject</code> 和 <code>Objective-C</code> 程序是如何与运行时系统进行交互的。它会检查运行时如何动态的加载一个新类，以及发送消息给其他对象。同时提供在运行时对象的信息。</p>
-<p>首先从 <code>NSObject</code> 入手，开始剖析，找到 <code>NSObject</code> 的定义，如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">@interface NSObject &lt;NSObject&gt; &#123;</div><div class="line">    Class isa  OBJC_ISA_AVAILABILITY;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p><code>isa</code> 指什么， 它的类型 <code>Class</code> 又是什么类型呢？</p>
-<p>接下来，分析 <code>Class</code> ，开始第二部分《类与对象》。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1811,7 +1834,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
