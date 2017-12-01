@@ -415,7 +415,7 @@
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">NSMutableDictionary *dic = [NSMutableDictionary dictionary];</div><div class="line">dic[@&quot;@name&quot;] = @&quot;111&quot;;</div><div class="line">[dic objectForKey:@&quot;@name&quot;]; //正常</div><div class="line">[dic valueForKey:@&quot;@name&quot;]; //崩溃，取的key是无@的name</div></pre></td></tr></table></figure>
 <h4 id="动画和-GCD中，需要使用-weak吗"><a href="#动画和-GCD中，需要使用-weak吗" class="headerlink" title="动画和 GCD中，需要使用 weak吗"></a>动画和 GCD中，需要使用 weak吗</h4><p>如果本身与GCD等不存在强引用关系，则不用使用weak</p>
-<h4 id="JSCore"><a href="#JSCore" class="headerlink" title="JSCore"></a>JSCore</h4><p>JS引擎 = JSContext + JSValue + JSExport + JSManagerValue + JSVirtualMachine</p>
+<h4 id="JSCore"><a href="#JSCore" class="headerlink" title="JSCore"></a>JSCore</h4><p>JS引擎 = JSContext + JSValue + JSExport + JSManagedValue + JSVirtualMachine</p>
 <p>JSContext：js运行环境，上下文</p>
 <p>JSValue：与oc之间对应的类型</p>
 <p>JSExport：协议，通过该协议，可以调用native对象。</p>
@@ -439,6 +439,27 @@
 <ul>
 <li>js -&gt; oc</li>
 </ul>
+<p>方式一：通过block方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">JSContext *context = [webView valueForKeyPath:@&quot;documentView.webView.mainFrame.javaScriptContext&quot;];</div><div class="line">context[@&quot;showAlert&quot;] = ^() &#123;</div><div class="line">	 NSArray *args = [JSContext currentArguments];</div><div class="line">	NSMutableString *message = [[NSMutableString alloc] init];</div><div class="line">	for (JSValue *val in args) &#123;</div><div class="line">		[message appendString:val.toString];</div><div class="line">		[message appendString:@&quot;|&quot;];</div><div class="line">	&#125;</div><div class="line">	UIAlertController *alert = [UIAlertController alertControllerWithTitle:@&quot;原生&quot; message:message preferredStyle:UIAlertControllerStyleAlert];</div><div class="line">	UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@&quot;取消&quot; style:UIAlertActionStyleCancel handler:nil];</div><div class="line">	[alert addAction:cancelAction];</div><div class="line">	[self presentViewController:alert animated:YES completion:nil];</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>showAlert 是 html中的 function，js在执行showAlert时，调用的是native的block</p>
+<p>方式二：通过 JSExport</p>
+<p>首先，定义一个协议，包含 js 可以调用的方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">@protocol TestJSOCObjectProtocol &lt;JSExport&gt;</div><div class="line"></div><div class="line">- (void)testNoParam;</div><div class="line">- (void)testOneParam:(NSString *)msg;</div><div class="line">- (void)testTwoParam:(NSString *)msg1 SecondMsg:(NSString *)msg2;</div><div class="line"></div><div class="line">@end</div></pre></td></tr></table></figure>
+<p>定义类，去实现该协议</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">.h</div><div class="line"></div><div class="line">@interface TestJSOCObject : NSObject&lt;TestJSOCObjectProtocol&gt;</div><div class="line">@end</div><div class="line"></div><div class="line">.m中实现协议</div></pre></td></tr></table></figure>
+<p>在html中，定义object，以及function，去调用native的方法</p>
+<p>html<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">var testObject = new Object();</div><div class="line">function secondClick() &#123;</div><div class="line">	testObject.testNoParam();</div><div class="line">	testObject.testOneParam(&quot;js--one param method&quot;);</div><div class="line">	testObject.testTwoParamSecondMsg(&quot;js - param1&quot;, &quot;js - param2&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在webview加载完成后，获取 context，为 js中的testObject去赋值native的对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">JSContext *context = [webView valueForKeyPath:@&quot;documentView.webView.mainFrame.javaScriptContext&quot;];</div><div class="line">TestJSOCObject *test = [TestJSOCObject new];</div><div class="line">context[@&quot;testObject&quot;] = test;</div></pre></td></tr></table></figure>
+<p>点击 html上的按钮，观察xcode的log。</p>
+<p>我们也可以通过语句直接调用js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">NSString *js = @&quot;testObject.testNoParam(&apos;js&apos;)&quot;;</div><div class="line">[context evaluateScript:js];</div></pre></td></tr></table></figure>
+<p>注意点：iOS的内存管理方式是引用计数，js的内存管理方式是垃圾回收，有几种场景，会导致循环引用</p>
+<ul>
+<li>在block里面，直接使用 self.context</li>
+<li>将 self.obj直接塞给jsvalue</li>
+</ul>
+<p>解决方案：采用JSManagedValue，可 参照 参考中的实例。</p>
 <h4 id="KVO"><a href="#KVO" class="headerlink" title="KVO"></a>KVO</h4><p>见地址 <a href="https://littledragonhuman.github.io/2017/11/29/KVO%E7%9A%84%E5%B0%8F%E7%A7%98%E5%AF%86/" target="_blank" rel="external">https://littledragonhuman.github.io/2017/11/29/KVO%E7%9A%84%E5%B0%8F%E7%A7%98%E5%AF%86/</a></p>
 <h4 id="判断几个GCD的运行结果"><a href="#判断几个GCD的运行结果" class="headerlink" title="判断几个GCD的运行结果"></a>判断几个GCD的运行结果</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">NSLog(@&quot;1&quot;);</div><div class="line">dispatch_sync(dispatch_get_main_queue(), ^&#123;</div><div class="line">	NSLog(@&quot;2&quot;);</div><div class="line">&#125;);</div><div class="line">NSLog(@&quot;3&quot;);</div></pre></td></tr></table></figure>
 <p>主线程：1 -&gt; 同步线程 -&gt; 3 -&gt; 2</p>
