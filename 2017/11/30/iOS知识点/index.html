@@ -96,7 +96,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/11/30/iOS知识点/index.html">
 <meta property="og:site_name" content="fly&#39;s blog">
 <meta property="og:description" content="NSArray、NSDictionary、NSString为什么用copy？因为它们都有 NSMutable* 的子类，一旦将 NSMutable* 子类 赋值给 NS*，则会出现 内容被修改的 场景，用 copy，保证数据的正确性。 声明一个属性  @property (copy) NSMutableArray *array;  因为使用了copy属性，copy出来的是个 不可变的array，s">
-<meta property="og:updated_time" content="2017-12-01T02:34:16.000Z">
+<meta property="og:updated_time" content="2017-12-01T05:04:08.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS知识点">
 <meta name="twitter:description" content="NSArray、NSDictionary、NSString为什么用copy？因为它们都有 NSMutable* 的子类，一旦将 NSMutable* 子类 赋值给 NS*，则会出现 内容被修改的 场景，用 copy，保证数据的正确性。 声明一个属性  @property (copy) NSMutableArray *array;  因为使用了copy属性，copy出来的是个 不可变的array，s">
@@ -360,7 +360,7 @@
 <p>NS*  mutableCopy =&gt; 内容复制</p>
 <p>NSMutable*  mutableCopy =&gt; 内容复制</p>
 <h4 id="property"><a href="#property" class="headerlink" title="@property"></a>@property</h4><p>@property = ivar + setter + getter</p>
-<p>nonatomic、atomic 是否线程安全，默认 atomic</p>
+<p>nonatomic、atomic 是否线程安全，默认 atomic，atomic比nonatomic线程安全，可以保证setter和getter的完整性，但并不是绝对安全，当多个线程同时访问时，可能会出现问题，要保证绝对安全，则使用<code>@synthesize</code></p>
 <p>ivar、setter、getter 通过 <code>自动合成</code> 添加到类中，编译器 编译时 执行。</p>
 <p>那 <code>@synthesize</code> 和 <code>@dynamic</code> 的具体作用是什么呢？</p>
 <p><code>@dynamic</code>：告诉编译器，属性的setter 和 getter要自己实现，不要自动生成，如果用户不实现 setter 和 getter方法，编译时不会报错，但如果 使用.方法，则会crash。一定要 实现setter和getter方法。</p>
@@ -455,7 +455,7 @@
 <li>将 self.obj直接塞给jsvalue</li>
 </ul>
 <p>解决方案：采用JSManagedValue，可 参照 参考中的实例。</p>
-<h4 id="KVO"><a href="#KVO" class="headerlink" title="KVO"></a>KVO</h4><p>见地址 <a href="https://littledragonhuman.github.io/2017/11/29/KVO%E7%9A%84%E5%B0%8F%E7%A7%98%E5%AF%86/" target="_blank" rel="external">https://littledragonhuman.github.io/2017/11/29/KVO%E7%9A%84%E5%B0%8F%E7%A7%98%E5%AF%86/</a></p>
+<h4 id="KVO"><a href="#KVO" class="headerlink" title="KVO"></a>KVO</h4><p>基于runtime机制实现，见地址 <a href="https://littledragonhuman.github.io/2017/11/29/KVO%E7%9A%84%E5%B0%8F%E7%A7%98%E5%AF%86/" target="_blank" rel="external">https://littledragonhuman.github.io/2017/11/29/KVO%E7%9A%84%E5%B0%8F%E7%A7%98%E5%AF%86/</a></p>
 <h4 id="判断几个GCD的运行结果"><a href="#判断几个GCD的运行结果" class="headerlink" title="判断几个GCD的运行结果"></a>判断几个GCD的运行结果</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">NSLog(@&quot;1&quot;);</div><div class="line">dispatch_sync(dispatch_get_main_queue(), ^&#123;</div><div class="line">	NSLog(@&quot;2&quot;);</div><div class="line">&#125;);</div><div class="line">NSLog(@&quot;3&quot;);</div></pre></td></tr></table></figure>
 <p>主线程：1 -&gt; 同步线程 -&gt; 3 -&gt; 2</p>
 <p>3等2，2等3，输出1后，死锁。</p>
@@ -475,14 +475,38 @@
 <p>主线程：异步线程 -&gt; 4 -&gt; while -&gt; 5 -&gt; 2</p>
 <p>全局线程： 1 -&gt; 同步线程 -&gt; 3</p>
 <p>输出 1，4顺序不定，3依赖于2，2依赖于5，5前面是个死循环，阻塞，死锁</p>
-<h4 id="SDWebImage框架的实现流程"><a href="#SDWebImage框架的实现流程" class="headerlink" title="SDWebImage框架的实现流程"></a>SDWebImage框架的实现流程</h4><h4 id="runloop"><a href="#runloop" class="headerlink" title="runloop"></a>runloop</h4><h4 id="scroll上有个timer，滑动时，timer会有何变化"><a href="#scroll上有个timer，滑动时，timer会有何变化" class="headerlink" title="scroll上有个timer，滑动时，timer会有何变化"></a>scroll上有个timer，滑动时，timer会有何变化</h4><h4 id="autorelease-和-autoreleasepool"><a href="#autorelease-和-autoreleasepool" class="headerlink" title="autorelease 和 autoreleasepool"></a>autorelease 和 autoreleasepool</h4><h4 id="iOS与RN之间-是如何-通信的"><a href="#iOS与RN之间-是如何-通信的" class="headerlink" title="iOS与RN之间 是如何 通信的"></a>iOS与RN之间 是如何 通信的</h4><h4 id="iOS几种锁"><a href="#iOS几种锁" class="headerlink" title="iOS几种锁"></a>iOS几种锁</h4><ul>
-<li>信号量</li>
+<h4 id="import-include-class"><a href="#import-include-class" class="headerlink" title="#import #include @class"></a>#import #include @class</h4><ul>
+<li><code>#import</code> OC中用于导入头文件<ul>
+<li><code>#import &lt;&gt;</code> 导入系统文件</li>
+<li><code>#import “”</code> 导入用户文件</li>
 </ul>
-<p>进入程序前，必须先获取信号量，执行完毕后释放信号量，其他线程必须等直到信号量释放。</p>
-<ul>
-<li>互斥锁</li>
+</li>
+<li><code>#include</code> C/C++中用于导入头文件</li>
+<li><code>@class</code> 告诉编译器某个类的声明，只有在运行时才会去查看这个类 </li>
 </ul>
-<p>当一个线程锁定一个资源，即锁定互斥量，其他线程只能被挂起，直到线程将</p>
+<h4 id="KVC的赋值过程"><a href="#KVC的赋值过程" class="headerlink" title="KVC的赋值过程"></a>KVC的赋值过程</h4><p>在调用setvalueforkey时，会先去查找key，存在赋值，不存在，则去查找_key，存在赋值，不存在，则调用<code>valueForUndefinedKey</code>和<code>setValue:forUndefinedKey:</code>，这两个方法用于抛出异常，如果此时没有重写，最后崩溃。</p>
+<h4 id="内省"><a href="#内省" class="headerlink" title="内省"></a>内省</h4><p>摘录：内省是对象揭示自己作为一个运行时对象的详细信息的一种能力。这些详细信息包括对象在继承树上的位置，对象是否遵循特定的协议，以及是否可以响应特定的消息。NSObject协议和类定义了很多内省方法，用于查询运行时信息，以便根据对象的特征进行识别</p>
+<p>isKindOfClass、isMemberOfClass、conformsToProtocol、respondsToSelector</p>
+<h4 id="SDWebImage里UIImageView加载图片的流程"><a href="#SDWebImage里UIImageView加载图片的流程" class="headerlink" title="SDWebImage里UIImageView加载图片的流程"></a>SDWebImage里UIImageView加载图片的流程</h4><ul>
+<li>以 字符串imageUrl 为key，url为value，为uiimageview添加关联属性，方便后面从imageview直接取url</li>
+<li>存在占位图，如果主线程safe，则在真实图片出现前，先展示占位图，self.image = placeholder</li>
+<li>通过SDWebImageManager,调用downloadImageWithURL<ul>
+<li>查看内存中是否存在图片，如果存在，返回</li>
+<li>启动io线程，查看磁盘中是否存在图片，如果存在，返回，并根据场景，判断是否将图片存入内存中</li>
+<li>通过SDWebImageDownloader，开始下载图片<ul>
+<li>判断是否需要对图片进行旋转处理，如果需要，则处理</li>
+<li>将图片写入内存和磁盘中</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="runloop"><a href="#runloop" class="headerlink" title="runloop"></a>runloop</h4><p>runloop，运行循环，内部为do-while循环，用于处理事务。一个线程对应一个runloop，保证程序的运行。主线程的runloop默认启动。</p>
+<h4 id="scroll上有个timer，滑动时，timer会有何变化"><a href="#scroll上有个timer，滑动时，timer会有何变化" class="headerlink" title="scroll上有个timer，滑动时，timer会有何变化"></a>scroll上有个timer，滑动时，timer会有何变化</h4><p>timer会被暂停，为什么呢？因为当前线程的runloop的mode被切换程滑动状态，由Default切换为Track模式。如果解决，可以将timer的模式，设置为common模式。</p>
+<h4 id="autorelease-和-autoreleasepool"><a href="#autorelease-和-autoreleasepool" class="headerlink" title="autorelease 和  autoreleasepool"></a>autorelease 和  autoreleasepool</h4><p>对一个对象发送 autorelease 消息时，会将该对象，加入到最近的 autoreleasepool 中，此时 该对象可继续使用。当作用域结束后，autoreleasepool会对池中的每个对象，发送release消息，销毁对象。</p>
+<h4 id="iOS与RN之间-是如何-通信的"><a href="#iOS与RN之间-是如何-通信的" class="headerlink" title="iOS与RN之间 是如何 通信的"></a>iOS与RN之间 是如何 通信的</h4><p><code>RCT_EXPORT_MODULE();</code> 将当前类暴露给rn，方便rn通过NativeModule去调用该类。</p>
+<p><code>RCT_EXPORT_METHOD(***);</code> 暴露方法，通过上面的类，直接调用native方法。</p>
+<h4 id="iOS几种锁"><a href="#iOS几种锁" class="headerlink" title="iOS几种锁"></a>iOS几种锁</h4><p>待补</p>
 <h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
 <li><a href="http://www.jianshu.com/p/79479a09a8c0" target="_blank" rel="external">关联对象</a></li>
 <li><a href="https://github.com/ChenYilong/iOSInterviewQuestions" target="_blank" rel="external">靠谱iOS</a></li>
@@ -660,7 +684,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#NSArray、NSDictionary、NSString为什么用copy？"><span class="nav-number">1.</span> <span class="nav-text">NSArray、NSDictionary、NSString为什么用copy？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#block-为什么用-copy"><span class="nav-number">2.</span> <span class="nav-text">block 为什么用 copy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#copy-效果"><span class="nav-number">3.</span> <span class="nav-text">copy 效果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#property"><span class="nav-number">4.</span> <span class="nav-text">@property</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#category如何实现添加属性"><span class="nav-number">5.</span> <span class="nav-text">category如何实现添加属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#weak变量，是如何自动nil"><span class="nav-number">6.</span> <span class="nav-text">weak变量，是如何自动nil</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#向-nil-or-NSNull发送消息"><span class="nav-number">7.</span> <span class="nav-text">向 nil or NSNull发送消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#拯救-方法没有实现的-最后3个步骤"><span class="nav-number">8.</span> <span class="nav-text">拯救 方法没有实现的 最后3个步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#运行时，可否增加实例变量"><span class="nav-number">9.</span> <span class="nav-text">运行时，可否增加实例变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#setObject-forKey-与-setValue-forKey-的区别"><span class="nav-number">10.</span> <span class="nav-text">setObject:forKey 与 setValue:forKey 的区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动画和-GCD中，需要使用-weak吗"><span class="nav-number">11.</span> <span class="nav-text">动画和 GCD中，需要使用 weak吗</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSCore"><span class="nav-number">12.</span> <span class="nav-text">JSCore</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVO"><span class="nav-number">13.</span> <span class="nav-text">KVO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#判断几个GCD的运行结果"><span class="nav-number">14.</span> <span class="nav-text">判断几个GCD的运行结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SDWebImage框架的实现流程"><span class="nav-number">15.</span> <span class="nav-text">SDWebImage框架的实现流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#runloop"><span class="nav-number">16.</span> <span class="nav-text">runloop</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scroll上有个timer，滑动时，timer会有何变化"><span class="nav-number">17.</span> <span class="nav-text">scroll上有个timer，滑动时，timer会有何变化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#autorelease-和-autoreleasepool"><span class="nav-number">18.</span> <span class="nav-text">autorelease 和 autoreleasepool</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iOS与RN之间-是如何-通信的"><span class="nav-number">19.</span> <span class="nav-text">iOS与RN之间 是如何 通信的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iOS几种锁"><span class="nav-number">20.</span> <span class="nav-text">iOS几种锁</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number"></span> <span class="nav-text">参考</span></a></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#NSArray、NSDictionary、NSString为什么用copy？"><span class="nav-number">1.</span> <span class="nav-text">NSArray、NSDictionary、NSString为什么用copy？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#block-为什么用-copy"><span class="nav-number">2.</span> <span class="nav-text">block 为什么用 copy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#copy-效果"><span class="nav-number">3.</span> <span class="nav-text">copy 效果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#property"><span class="nav-number">4.</span> <span class="nav-text">@property</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#category如何实现添加属性"><span class="nav-number">5.</span> <span class="nav-text">category如何实现添加属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#weak变量，是如何自动nil"><span class="nav-number">6.</span> <span class="nav-text">weak变量，是如何自动nil</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#向-nil-or-NSNull发送消息"><span class="nav-number">7.</span> <span class="nav-text">向 nil or NSNull发送消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#拯救-方法没有实现的-最后3个步骤"><span class="nav-number">8.</span> <span class="nav-text">拯救 方法没有实现的 最后3个步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#运行时，可否增加实例变量"><span class="nav-number">9.</span> <span class="nav-text">运行时，可否增加实例变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#setObject-forKey-与-setValue-forKey-的区别"><span class="nav-number">10.</span> <span class="nav-text">setObject:forKey 与 setValue:forKey 的区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动画和-GCD中，需要使用-weak吗"><span class="nav-number">11.</span> <span class="nav-text">动画和 GCD中，需要使用 weak吗</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSCore"><span class="nav-number">12.</span> <span class="nav-text">JSCore</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVO"><span class="nav-number">13.</span> <span class="nav-text">KVO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#判断几个GCD的运行结果"><span class="nav-number">14.</span> <span class="nav-text">判断几个GCD的运行结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#import-include-class"><span class="nav-number">15.</span> <span class="nav-text">#import #include @class</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC的赋值过程"><span class="nav-number">16.</span> <span class="nav-text">KVC的赋值过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#内省"><span class="nav-number">17.</span> <span class="nav-text">内省</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SDWebImage里UIImageView加载图片的流程"><span class="nav-number">18.</span> <span class="nav-text">SDWebImage里UIImageView加载图片的流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#runloop"><span class="nav-number">19.</span> <span class="nav-text">runloop</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scroll上有个timer，滑动时，timer会有何变化"><span class="nav-number">20.</span> <span class="nav-text">scroll上有个timer，滑动时，timer会有何变化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#autorelease-和-autoreleasepool"><span class="nav-number">21.</span> <span class="nav-text">autorelease 和  autoreleasepool</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iOS与RN之间-是如何-通信的"><span class="nav-number">22.</span> <span class="nav-text">iOS与RN之间 是如何 通信的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iOS几种锁"><span class="nav-number">23.</span> <span class="nav-text">iOS几种锁</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number"></span> <span class="nav-text">参考</span></a></div>
             
 
           </div>
